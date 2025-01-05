@@ -1,8 +1,10 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, TextAreaComponent } from 'obsidian';
 import { getActions } from './src/action';
 import { QuailPluginSettings } from './src/interface';
 import { Client, AuxiliaClient } from 'quail-js';
 import { startLoginElectron, refreshToken } from './src/oauth/oauth';
+
+import manifest from './manifest.json';
 
 const DEFAULT_SETTINGS: QuailPluginSettings = {
 	listID: '',
@@ -195,6 +197,9 @@ export default class QuailPlugin extends Plugin {
 class QuailSettingTab extends PluginSettingTab {
 	plugin: QuailPlugin;
 
+	showDebugCounter = 0;
+	showDebugSection = false;
+
 	constructor(app: App, plugin: QuailPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
@@ -266,45 +271,44 @@ class QuailSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// debug
-		containerEl.createEl("h6", { text: "Debug" });
+		const version = containerEl.createDiv({
+			cls: "setting-item",
+		});
 
-		new Setting(containerEl)
-			.setName('List ID or slug *')
-			.setDesc('Required. You can find it in the URL of your list page. For example, if your list URL is https://quaily.com/my-list, your list ID or slug is "my-list".')
-			.addText(text => text
-				.setPlaceholder('Enter List ID or slug')
-				.setValue(this.plugin.settings.listID)
-				.onChange(async (value) => {
-					this.plugin.settings.listID = value;
-					await this.plugin.saveSettings();
-				}));
+		version.innerText = `version: ${manifest.version}`;
+		version.style.fontSize = "0.8em";
+		version.style.width = "100%";
+		version.style.textAlign = "left";
+		version.style.color = "gray";
+		version.onclick = () => {
+			if (this.showDebugCounter === 4) {
+				this.showDebugSection = !this.showDebugSection;
+				this.showDebugCounter = 0;
+				this.display();
+			}
+			this.showDebugCounter++;
+		}
 
-		new Setting(containerEl)
-			.setName('Access Token')
-			.addTextArea(text => text
-				.setValue(this.plugin.settings.accessToken)
-				.onChange(async (value) => {
-					this.plugin.settings.accessToken = value;
-					await this.plugin.saveSettings();
-				}));
+		if (this.showDebugSection) {
+			// debug section
+			containerEl.createEl("h6", { text: "Debug" });
 
-		new Setting(containerEl)
-			.setName('Refresh Token')
-			.addTextArea(text => text
-				.setValue(this.plugin.settings.refreshToken)
-				.onChange(async (value) => {
-					this.plugin.settings.refreshToken = value;
-					await this.plugin.saveSettings();
-				}));
+			const textareaContainer = containerEl.createDiv({
+				cls: "setting-item",
+			});
 
-		new Setting(containerEl)
-			.setName('Token Expiry')
-			.addTextArea(text => text
-				.setValue(this.plugin.settings.tokenExpiry)
-				.onChange(async (value) => {
-					this.plugin.settings.tokenExpiry = value;
-					await this.plugin.saveSettings();
-				}));
+			const textarea = textareaContainer.createEl("textarea", {
+				cls: "setting-item-control",
+				attr: { placeholder: "Enter your settings here...", disabled: "true" },
+			});
+
+			textarea.style.width = "100%";
+			textarea.style.height = "200px";
+			textarea.style.textAlign = "left";
+			textarea.value = `list id: ${this.plugin.settings.listID}
+access token: ${this.plugin.settings.accessToken}
+refresh token: ${this.plugin.settings.refreshToken}
+token expiry: ${this.plugin.settings.tokenExpiry}`;
+		}
 	}
 }
