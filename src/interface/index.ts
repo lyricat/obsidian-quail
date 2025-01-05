@@ -1,8 +1,12 @@
 export interface QuailPluginSettings {
-	apikey: string;
-	apibase: string;
-	host: string;
 	listID: string;
+
+	accessToken: string;
+	refreshToken: string;
+	tokenExpiry: string;
+
+	me: any;
+	lists: any;
 
 	strictLineBreaks: boolean;
 }

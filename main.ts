@@ -1,33 +1,39 @@
-import { App, Plugin, PluginSettingTab, Setting, SettingTab } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { getActions } from './src/action';
 import { QuailPluginSettings } from './src/interface';
-import { Client } from 'quail-js';
+import { Client, AuxiliaClient } from 'quail-js';
+import { startLoginElectron, refreshToken } from './src/oauth/oauth';
 
 const DEFAULT_SETTINGS: QuailPluginSettings = {
-	apikey: '',
-	apibase: 'https://api.quail.ink',
-	host: 'https://quaily.com',
 	listID: '',
 	strictLineBreaks: true,
+	// tokens
+	accessToken: '',
+	refreshToken: '',
+	tokenExpiry: '',
+	// user info
+	me: null,
+	lists: [],
 }
 
 export default class QuailPlugin extends Plugin {
 	settings: QuailPluginSettings;
+	client: any;
+	auxiliaClient: any;
 
 	async onload() {
 		await this.loadSettings();
 
-		const client = new Client({
-			apikey: this.settings.apikey,
-			apibase: this.settings.apibase,
-			debug: false,
-		});
+		await this.updateToken();
 
-		const actions = getActions(client, this.app, this.settings);
-		for (let ix = 0; ix < actions.length; ix++) {
-			const action:any = actions[ix];
-			this.addCommand(action);
-		}
+		this.getClients();
+
+		await this.loadActions();
+		// const actions = getActions(this.client, this);
+		// for (let ix = 0; ix < actions.length; ix++) {
+		// 	const action:any = actions[ix];
+		// 	this.addCommand(action);
+		// }
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new QuailSettingTab(this.app, this));
@@ -43,7 +49,35 @@ export default class QuailPlugin extends Plugin {
 	}
 
 	onunload() {
+	}
 
+	getClients() {
+		this.client = new Client({
+			access_token: this.settings.accessToken,
+			apibase: 'https://api.quail.ink',
+			debug: false,
+		});
+		this.auxiliaClient = new AuxiliaClient({
+			access_token: this.settings.accessToken,
+			apibase: 'https://api.quail.ink',
+			debug: false,
+		});
+	}
+
+	async loadActions() {
+		const actions = getActions(this);
+		if (actions.length === 0) {
+			console.error("No actions found");
+			return;
+		} else if (actions.length === 1 && actions[0].id === 'quail-login') {
+			this.addCommand(actions[0]);
+		} else {
+			(this.app as any).commands.removeCommand('quail-login');
+			for (let ix = 0; ix < actions.length; ix++) {
+				const action:any = actions[ix];
+				this.addCommand(action);
+			}
+		}
 	}
 
 	async loadSettings() {
@@ -52,6 +86,109 @@ export default class QuailPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async login() {
+		try {
+			console.log("login: oauth flow start");
+			// Start the login flow in a popup
+			const token = await startLoginElectron();
+			// if your auth server is at localhost:8080
+			console.log("login: oauth flow success!", token);
+			console.log("login: access token:", token.access_token);
+			console.log("login: refresh token:", token.refresh_token);
+			console.log("login: token expiry:", token.expiry);
+			this.settings.accessToken = token.access_token;
+			this.settings.refreshToken = token.refresh_token;
+			this.settings.tokenExpiry = token.expiry;
+
+			// update the client
+			this.getClients();
+
+			// get user info
+			const me = await this.client.getMe();
+			console.log("login: me", me);
+			this.settings.me = me;
+
+			// get lists
+			const lists = await this.client.getUserLists(me.id);
+			console.log("login: lists", lists);
+			this.settings.lists = lists;
+			let found = false;
+			for (let ix = 0; ix < lists.length; ix++) {
+				const list = lists[ix];
+				if (`${list.id}` === this.settings.listID || list.slug === this.settings.listID) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				this.settings.listID = lists[0].id;
+			}
+
+			await this.saveSettings();
+			await this.loadActions();
+			// store them somewhere safe (e.g. Obsidian plugin storage)
+		} catch (err) {
+			console.error("OAuth flow error:", err);
+		}
+	}
+
+	async refreshToken() {
+		try {
+			console.log("refreshToken: refresh flow start");
+			// Start the login flow in a popup
+			const token = await refreshToken(this.settings.refreshToken)
+			// if your auth server is at localhost:8080
+			console.log("refreshToken: refresh success!", token);
+			console.log("refreshToken: access token:", token.access_token);
+			console.log("refreshToken: refresh token:", token.refresh_token);
+			console.log("refreshToken: token expiry:", token.expiry);
+			this.settings.accessToken = token.access_token;
+			this.settings.refreshToken = token.refresh_token;
+			this.settings.tokenExpiry = token.expiry;
+			await this.saveSettings();
+		} catch (err) {
+			console.error("refresh token flow error:", err);
+		}
+	}
+
+	async clearTokens() {
+		console.log("clearTokens: clear tokens");
+		this.settings.accessToken = '';
+		this.settings.refreshToken = '';
+		this.settings.tokenExpiry = '';
+		await this.saveSettings();
+		await this.loadActions();
+	}
+
+	isLogged () {
+		if (this.settings.accessToken === ''
+			|| this.settings.refreshToken === ''
+			|| this.settings.tokenExpiry === ''
+			|| this.settings.me === null
+			|| this.settings.lists?.length === 0
+		) {
+			return false;
+		}
+		return true
+	}
+
+	updateToken() {
+		if (this.settings.tokenExpiry !== '') {
+			const expiry = new Date(this.settings.tokenExpiry);
+			const now = new Date();
+			// if the expiry is more than 89 days ago, need to login again
+			if (expiry.getTime() <= now.getTime() - 3600*24*89) {
+				this.clearTokens();
+			} else if (expiry.getTime() <= now.getTime() - 3600*12) {
+				this.refreshToken();
+			} else {
+				console.log("Token is still valid, nothing to do");
+			}
+		} else {
+			this.clearTokens();
+		}
 	}
 }
 
@@ -68,21 +205,73 @@ class QuailSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h6", { text: "API and connections settings" });
+		containerEl.createEl("h5", { text: "Quaily" });
+
+		if (this.plugin.isLogged()) {
+			new Setting(containerEl)
+				.setHeading()
+				.setName('Hello, ' + this.plugin.settings.me.name)
+				.setDesc('You are logged in as ' + this.plugin.settings.me.email)
+				.addButton(button => button
+					.setButtonText('Logout')
+					.onClick(async () => {
+						await this.plugin.clearTokens();
+						this.display();
+					})
+				)
+		} else {
+			new Setting(containerEl)
+			.setHeading()
+			.setName('Login to Quaily')
+			.setDesc('Please login to use the plugin')
+			.addButton(button => button
+				.setCta()
+				.setButtonText('Login')
+				.onClick(async () => {
+					await this.plugin.login();
+					this.display();
+				})
+			)
+		}
 
 		new Setting(containerEl)
-			.setName('Quail API key (required)')
-			.setDesc('Please grab your API key from https://quaily.com/profile/apikeys. Restart Obsidian after you add or change the API key.')
-			.addText(text => text
-				.setPlaceholder('Enter API Key')
-				.setValue(this.plugin.settings.apikey)
+		.setName('List')
+		.setDesc('Select the list you want to use')
+		.addDropdown(dropdown => {
+			if (this.plugin.settings.lists?.length === 0) {
+				dropdown.addOption('none', 'No lists found');
+			} else {
+				for (let ix = 0; ix < this.plugin.settings.lists.length; ix++) {
+					const list = this.plugin.settings.lists[ix];
+					dropdown.addOption(list.id, list.title);
+				}
+			}
+			dropdown.setValue(this.plugin.settings.listID);
+			dropdown.onChange(async (value) => {
+				this.plugin.settings.listID = value;
+				await this.plugin.saveSettings();
+			});
+		})
+
+		containerEl.createEl("h6", { text: "Editor" });
+
+
+		new Setting(containerEl)
+			.setName('Strict line breaks')
+			.setDesc('Markdown specs ignore single line breaks. If you want to keep them, enable this option.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.strictLineBreaks)
 				.onChange(async (value) => {
-					this.plugin.settings.apikey = value;
+					this.plugin.settings.strictLineBreaks = value;
 					await this.plugin.saveSettings();
 				}));
+
+		// debug
+		containerEl.createEl("h6", { text: "Debug" });
+
 		new Setting(containerEl)
-			.setName('List ID or slug (required)')
-			.setDesc('Your list ID or slug. You can find it in the URL of your list page. For example, if your list URL is https://quaily.com/my-list, your list ID or slug is "my-list".')
+			.setName('List ID or slug *')
+			.setDesc('Required. You can find it in the URL of your list page. For example, if your list URL is https://quaily.com/my-list, your list ID or slug is "my-list".')
 			.addText(text => text
 				.setPlaceholder('Enter List ID or slug')
 				.setValue(this.plugin.settings.listID)
@@ -92,35 +281,29 @@ class QuailSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Quail API base (required)')
-			.setDesc('You can change the base URL if you are using a self-hosted version of Quail')
-			.addText(text => text
-				.setPlaceholder('Enter API Base')
-				.setValue(this.plugin.settings.apibase)
+			.setName('Access Token')
+			.addTextArea(text => text
+				.setValue(this.plugin.settings.accessToken)
 				.onChange(async (value) => {
-					this.plugin.settings.apibase = value;
-					await this.plugin.saveSettings();
-				}));
-		new Setting(containerEl)
-			.setName('Quail host (required)')
-			.setDesc('You can change the host URL if you are using a self-hosted version of Quail')
-			.addText(text => text
-				.setPlaceholder('Enter Host')
-				.setValue(this.plugin.settings.host)
-				.onChange(async (value) => {
-					this.plugin.settings.host = value;
+					this.plugin.settings.accessToken = value;
 					await this.plugin.saveSettings();
 				}));
 
-		containerEl.createEl("h6", { text: "Editor" });
+		new Setting(containerEl)
+			.setName('Refresh Token')
+			.addTextArea(text => text
+				.setValue(this.plugin.settings.refreshToken)
+				.onChange(async (value) => {
+					this.plugin.settings.refreshToken = value;
+					await this.plugin.saveSettings();
+				}));
 
 		new Setting(containerEl)
-			.setName('Strict line breaks')
-			.setDesc('Markdown specs ignore single line breaks. If you want to keep them, enable this option.')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.strictLineBreaks)
+			.setName('Token Expiry')
+			.addTextArea(text => text
+				.setValue(this.plugin.settings.tokenExpiry)
 				.onChange(async (value) => {
-					this.plugin.settings.strictLineBreaks = value;
+					this.plugin.settings.tokenExpiry = value;
 					await this.plugin.saveSettings();
 				}));
 	}

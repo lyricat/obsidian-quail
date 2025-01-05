@@ -12,7 +12,7 @@ export default {
     ret["datetime"] = now.format("YYYY-MM-DD HH:mm");
 
     // default slug, summary, tags
-    const resp = await client.generateFrontmatter(title, content)
+    const resp = await client.generateFrontmatter(title, content, ['slug', 'summary', 'tags']);
     ret["slug"] = encodeQuote(resp.slug as string);
     ret["summary"] = encodeQuote(resp.summary as string);
     ret["tags"] = encodeQuote(resp.tags as string);

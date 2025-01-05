@@ -31,8 +31,8 @@ importers:
         specifier: latest
         version: 1.5.7-1(@codemirror/state@6.4.1)(@codemirror/view@6.28.4)
       quail-js:
-        specifier: 0.3.9
-        version: 0.3.9
+        specifier: 0.3.18
+        version: 0.3.18
       tslib:
         specifier: 2.4.0
         version: 2.4.0
@@ -652,8 +652,8 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
-  quail-js@0.3.9:
-    resolution: {integrity: sha512-0Htt0BcetjjxpqCzhoURGj0x4kICee3FIODETR30oIYmGGdG2bdsEjHFaAFD51JSRiDmwqxDUEIKGzHLKGVgTA==}
+  quail-js@0.3.18:
+    resolution: {integrity: sha512-CXQ3y0tNVNp75pJsYsMkiJmAUPB67zEo+CjGweO0kSJfsCOdBGHak7nbIZFxxREx12YclFDGy+vPrT/61A4LaA==}
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -1358,7 +1358,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  quail-js@0.3.9:
+  quail-js@0.3.18:
     dependencies:
       dayjs: 1.11.11
 

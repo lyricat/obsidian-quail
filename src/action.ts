@@ -72,7 +72,7 @@ async function arrangeArticle(app: App, client: any, settings: QuailPluginSettin
   }
 }
 
-export async function savePost(app: App, client: any, settings: QuailPluginSettings) {
+export async function savePost(app: App, client: any, auxiliaClient:any, settings: QuailPluginSettings) {
   const { title, frontmatter, content } = await arrangeArticle(app, client, settings);
   if (content == null || title == null) {
     return;
@@ -93,7 +93,7 @@ export async function savePost(app: App, client: any, settings: QuailPluginSetti
     const file = app.workspace.getActiveFile();
     if (file) {
       // try to generate metadata
-      const fmc:any = await fm.suggestFrontmatter(client, title, content, [])
+      const fmc:any = await fm.suggestFrontmatter(auxiliaClient, title, content, [])
       const proc = (frontmatter:any) => {
         if (file) {
           const loadingModal = new LoadingModal(app)
@@ -151,7 +151,27 @@ export async function savePost(app: App, client: any, settings: QuailPluginSetti
   return resp;
 }
 
-export function getActions(client: any, app: App, settings: QuailPluginSettings) {
+export function getActions(plugin: any) {
+  const app = plugin.app;
+  const settings = plugin.settings;
+  const client = plugin.client;
+  const auxiliaClient = plugin.auxiliaClient;
+
+  const loginAction = [
+    {
+      id: 'quail-login',
+      name: 'Login',
+      callback: async () => {
+        await plugin.login();
+      }
+    }
+  ];
+
+  // check token status and expiry
+  if (settings.accessToken === '' || settings.refreshToken === '' || settings.tokenExpiry === '') {
+    return loginAction;
+  }
+
   return [
   {
     id: 'quail-publish',
@@ -164,7 +184,7 @@ export function getActions(client: any, app: App, settings: QuailPluginSettings)
 
         let pt:any = null;
         try {
-          pt = await savePost(app, client, settings);
+          pt = await savePost(app, client, auxiliaClient, settings);
         } catch (e) {
           new ErrorModal(app, e).open();
           loadingModal.close();
@@ -210,7 +230,7 @@ export function getActions(client: any, app: App, settings: QuailPluginSettings)
       loadingModal.open();
 
       try {
-        // await client.unpublishPost(settings.listID, frontmatter?.slug);
+        await client.unpublishPost(settings.listID, frontmatter?.slug);
         console.log("unpublish: ", frontmatter?.slug)
         new MessageModal(app, {
           title: "Unpublish",
@@ -234,7 +254,7 @@ export function getActions(client: any, app: App, settings: QuailPluginSettings)
 
       let pt:any = null;
       try {
-        pt = await savePost(app, client, settings);
+        pt = await savePost(app, client, auxiliaClient, settings);
       } catch (e) {
         new ErrorModal(app, e).open();
         loadingModal.close();
@@ -290,7 +310,7 @@ export function getActions(client: any, app: App, settings: QuailPluginSettings)
 
       if (file) {
         const title = file.name.replace(/\.md$/, '');
-        const fmc:any = await fm.suggestFrontmatter(client, title, content, [])
+        const fmc:any = await fm.suggestFrontmatter(auxiliaClient, title, content, [])
         const proc = (frontmatter: any) => {
           if (file) {
             const loadingModal = new LoadingModal(app)
