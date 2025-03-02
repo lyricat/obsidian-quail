@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting, TextAreaComponent } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { getActions } from './src/action';
 import { QuailPluginSettings } from './src/interface';
 import { Client, AuxiliaClient } from 'quail-js';
@@ -8,6 +8,7 @@ import manifest from './manifest.json';
 
 const DEFAULT_SETTINGS: QuailPluginSettings = {
 	listID: '',
+	listSlug: '',
 	strictLineBreaks: true,
 	// tokens
 	accessToken: '',
@@ -29,6 +30,12 @@ export default class QuailPlugin extends Plugin {
 		await this.updateToken();
 
 		this.getClients();
+
+		if (this.isLogged()) {
+			await this.updateChannels();
+
+			await this.saveSettings();
+		}
 
 		await this.loadActions();
 		// const actions = getActions(this.client, this);
@@ -90,6 +97,30 @@ export default class QuailPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	async updateChannels() {
+		const lists = await this.client.getUserLists(this.settings.me.id);
+		this.settings.lists = lists;
+		let found = false;
+		for (let ix = 0; ix < lists.length; ix++) {
+			const list = lists[ix];
+			if (`${list.id}` === this.settings.listID || list.slug === this.settings.listID) {
+				found = true;
+				this.settings.listID = list.id;
+				this.settings.listSlug = list.slug;
+				break;
+			}
+		}
+		if (!found) {
+			if (lists.length > 0) {
+				this.settings.listID = lists[0].id;
+				this.settings.listSlug = lists[0].slug;
+			} else {
+				this.settings.listID = '';
+				this.settings.listSlug = '';
+			}
+		}
+	}
+
 	async login() {
 		try {
 			console.log("login: oauth flow start");
@@ -113,22 +144,10 @@ export default class QuailPlugin extends Plugin {
 			this.settings.me = me;
 
 			// get lists
-			const lists = await this.client.getUserLists(me.id);
-			console.log("login: lists", lists);
-			this.settings.lists = lists;
-			let found = false;
-			for (let ix = 0; ix < lists.length; ix++) {
-				const list = lists[ix];
-				if (`${list.id}` === this.settings.listID || list.slug === this.settings.listID) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				this.settings.listID = lists[0].id;
-			}
+			await this.updateChannels();
 
 			await this.saveSettings();
+
 			await this.loadActions();
 			// store them somewhere safe (e.g. Obsidian plugin storage)
 		} catch (err) {
@@ -180,12 +199,14 @@ export default class QuailPlugin extends Plugin {
 		if (this.settings.tokenExpiry !== '') {
 			const expiry = new Date(this.settings.tokenExpiry);
 			const now = new Date();
-			// if the expiry is more than 89 days ago, need to login again
-			if (expiry.getTime() <= now.getTime() - 3600*24*89) {
+			if (expiry.getTime() <= now.getTime() - 3600*24*364) {
+				// if the expiry is more than 364 days ago, need to login again
 				this.clearTokens();
 			} else if (expiry.getTime() <= now.getTime() - 3600*12) {
+				// refresh the token if it's less than 12 hours from expiry
 				this.refreshToken();
 			} else {
+				this.refreshToken();
 				console.log("Token is still valid, nothing to do");
 			}
 		} else {
@@ -239,24 +260,35 @@ class QuailSettingTab extends PluginSettingTab {
 			)
 		}
 
-		new Setting(containerEl)
-		.setName('List')
-		.setDesc('Select the list you want to use')
-		.addDropdown(dropdown => {
-			if (this.plugin.settings.lists?.length === 0) {
-				dropdown.addOption('none', 'No lists found');
-			} else {
-				for (let ix = 0; ix < this.plugin.settings.lists.length; ix++) {
-					const list = this.plugin.settings.lists[ix];
-					dropdown.addOption(list.id, list.title);
+		const chSec = new Setting(containerEl)
+			.setName('Channel')
+			.setDesc('Select the channel you want to use')
+		if (this.plugin.settings.lists?.length !== 0) {
+			chSec.addDropdown(dropdown => {
+				if (this.plugin.settings.lists?.length === 0) {
+					dropdown.addOption('none', 'No channel found');
+				} else {
+					for (let ix = 0; ix < this.plugin.settings.lists.length; ix++) {
+						const list = this.plugin.settings.lists[ix];
+						dropdown.addOption(list.id, list.title);
+					}
 				}
-			}
-			dropdown.setValue(this.plugin.settings.listID);
-			dropdown.onChange(async (value) => {
-				this.plugin.settings.listID = value;
-				await this.plugin.saveSettings();
-			});
-		})
+				dropdown.setValue(this.plugin.settings.listID);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.listID = value;
+					await this.plugin.saveSettings();
+				});
+			})
+		} else {
+			chSec.addButton(button => button
+				.setCta()
+				.setButtonText('Create a channel')
+				.onClick(async () => {
+					window.open('https://quaily.com/dashboard', '_blank');
+				})
+			)
+
+		}
 
 		containerEl.createEl("h6", { text: "Editor" });
 
@@ -306,6 +338,7 @@ class QuailSettingTab extends PluginSettingTab {
 			textarea.style.height = "200px";
 			textarea.style.textAlign = "left";
 			textarea.value = `list id: ${this.plugin.settings.listID}
+list slug: ${this.plugin.settings.listSlug}
 access token: ${this.plugin.settings.accessToken}
 refresh token: ${this.plugin.settings.refreshToken}
 token expiry: ${this.plugin.settings.tokenExpiry}`;

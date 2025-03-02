@@ -203,8 +203,8 @@ export function getActions(plugin: any) {
 
         const slug = pt.slug || '';
         if (slug) {
-          const viewUrl = `${settings.host}/${settings.listID}/p/${slug}`;
-          new PublishResultModal(app, client, settings.listID, slug, viewUrl).open();
+          const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
+          new PublishResultModal(app, client, viewUrl).open();
         } else {
           new MessageModal(app, { message: "resp.slug is empty." }).open();
         }
@@ -265,8 +265,8 @@ export function getActions(plugin: any) {
 
       const slug = pt.slug || '';
       if (slug && pt.published_at != null) {
-        const viewUrl = `${settings.host}/${settings.listID}/p/${slug}`;
-        new PublishResultModal(app, client, settings.listID, slug, viewUrl).open();
+        const viewUrl = `https://quaily.com/${settings.listSlg}/p/${slug}`;
+        new PublishResultModal(app, client, viewUrl).open();
       }
     }
   },

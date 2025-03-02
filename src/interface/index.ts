@@ -1,5 +1,6 @@
 export interface QuailPluginSettings {
 	listID: string;
+	listSlug: string;
 
 	accessToken: string;
 	refreshToken: string;

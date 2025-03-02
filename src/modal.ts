@@ -7,6 +7,7 @@ function constructModalTitle(title: string) {
 	center.appendText(title);
 	h2.appendChild(center);
 	div.appendChild(h2);
+	div.style.marginBottom = '16px';
 	return div;
 }
 
@@ -41,19 +42,14 @@ class MessageModal extends Modal {
 class PublishResultModal extends Modal {
   url = '';
 	client = null;
-	listID = '';
-	slug = '';
 
 	constructor(app: App,
 		client: any,
-		listID: string, slug: string,
 		url: string
 	) {
 		super(app);
     this.url = url;
 		this.client = client;
-		this.listID = listID;
-		this.slug = slug;
 	}
 
 	onOpen() {
@@ -76,7 +72,12 @@ class PublishResultModal extends Modal {
 		a2.href = this.url;
 		a2.target = '_blank';
 		const button = document.createElement('button');
+		button.className = 'mod-cta';
 		button.appendText('Visit');
+		button.onclick = () => {
+			this.close();
+		}
+
 		a2.appendChild(button);
 		p2.appendChild(a2);
 		contentEl.appendChild(p2);
