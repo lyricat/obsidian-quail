@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-quail-plugin",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Save, publish, delivery notes via Quaily as newsletters and blogs. This is a quail (https://quaily.com) plugin for Obsidian (https://obsidian.md)",
 	"main": "main.js",
 	"scripts": {
