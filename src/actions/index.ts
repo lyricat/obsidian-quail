@@ -1,8 +1,13 @@
 import { App } from 'obsidian';
-import { LoadingModal, MessageModal, ErrorModal, PublishResultModal } from './modal';
-import util from './util';
-import { QuailPluginSettings } from './interface';
-import fm from "./frontmatter";
+import { LoadingModal, MessageModal, ErrorModal } from '../modals';
+import util from '../util';
+import { QuailPluginSettings } from '../interface';
+import fm from "../frontmatter";
+import aigen from './aigen';
+import save from './save';
+import publish from './publish';
+import unpublish from './unpublish';
+import send from './send';
 
 async function uploadAttachment(client: any, image: any) {
   const formData = new FormData();
@@ -173,191 +178,36 @@ export function getActions(plugin: any) {
   }
 
   return [
-  {
-    id: 'quail-publish',
-    name: 'Publish',
-    callback: async () => {
-      const file = app.workspace.getActiveFile();
-      if (file !== null) {
-        const loadingModal = new LoadingModal(app)
-        loadingModal.open();
-
-        let pt:any = null;
-        try {
-          pt = await savePost(app, client, auxiliaClient, settings);
-        } catch (e) {
-          new ErrorModal(app, e).open();
-          loadingModal.close();
-          return;
-        }
-
-        try {
-          pt = await client.publishPost(settings.listID, pt.slug);
-        } catch (e) {
-          new ErrorModal(app, e).open();
-          loadingModal.close();
-          return;
-        } finally {
-          loadingModal.close();
-        }
-
-        const slug = pt.slug || '';
-        if (slug) {
-          const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
-          new PublishResultModal(app, client, viewUrl).open();
-        } else {
-          new MessageModal(app, { message: "resp.slug is empty." }).open();
-        }
-
-        return;
-      }
-
-      return;
-    }
-  },
-
-  {
-    id: 'unpublish',
-    name: 'Unpublish',
-    callback: async () => {
-      const { frontmatter, err } = await util.getActiveFileContent(app);
-      if (err != null) {
-        new ErrorModal(app, new Error(err)).open();
-        return;
-      }
-
-      const loadingModal = new LoadingModal(app)
-      loadingModal.open();
-
-      try {
-        await client.unpublishPost(settings.listID, frontmatter?.slug);
-        console.log("unpublish: ", frontmatter?.slug)
-        new MessageModal(app, {
-          title: "Unpublish",
-          message: "This post has removed from published list."
-        }).open();
-      } catch (e) {
-        loadingModal.close();
-        new ErrorModal(app, e).open();
-      } finally {
-        loadingModal.close();
-      }
-    }
-  },
-
-  {
-    id: 'save',
-    name: 'Save',
-    callback: async () => {
-      const loadingModal = new LoadingModal(app)
-      loadingModal.open();
-
-      let pt:any = null;
-      try {
-        pt = await savePost(app, client, auxiliaClient, settings);
-      } catch (e) {
-        new ErrorModal(app, e).open();
-        loadingModal.close();
-        return ;
-      } finally {
-        loadingModal.close();
-      }
-
-      const slug = pt.slug || '';
-      if (slug && pt.published_at != null) {
-        const viewUrl = `https://quaily.com/${settings.listSlg}/p/${slug}`;
-        new PublishResultModal(app, client, viewUrl).open();
-      }
-    }
-  },
-
-  {
-    id: 'deliver',
-    name: 'Deliver',
-    callback: async () => {
-      const { frontmatter, err } = await util.getActiveFileContent(app);
-      if (err != null) {
-        new MessageModal(app, { message: err.toString() }).open();
-        return;
-      }
-
-      const loadingModal = new LoadingModal(app)
-      loadingModal.open();
-
-      try {
-        await client.deliverPost(settings.listID, frontmatter?.slug)
-        new MessageModal(app, {
-          title: "Delivery Requested",
-          message: "This post has been added into the delivery queue. It may take a few minutes to send out."
-        }).open();
-      } catch (e) {
-        loadingModal.close();
-        console.log("deliver error: ", e)
-        new ErrorModal(app, e).open();
-        return;
-      } finally {
-        loadingModal.close();
-      }
-    }
-  },
-
-  {
-    id: 'ai-gen-metadata',
-    name: 'Generate metadata by AI',
-    callback: async () => {
-      const content = await util.getActiveFileMarkdown(app);
-      const file = app.workspace.getActiveFile();
-
-      if (file) {
-        const title = file.name.replace(/\.md$/, '');
-        const fmc:any = await fm.suggestFrontmatter(auxiliaClient, title, content, [])
-        const proc = (frontmatter: any) => {
-          if (file) {
-            const loadingModal = new LoadingModal(app)
-            loadingModal.open();
-            try {
+    publish(app, client, auxiliaClient, settings),
+    unpublish(app, client, settings),
+    save(app, client, auxiliaClient, settings),
+    send(app, client, settings),
+    aigen(app, auxiliaClient),
+    {
+      id: 'insert-metadata',
+      name: 'Insert metadata template',
+      callback: async () => {
+        const file = app.workspace.getActiveFile();
+        if (file) {
+          const proc = (frontmatter: any) => {
+            if (frontmatter === null || Object.values(frontmatter).length === 0) {
+              const fmc:any = fm.emptyFrontmatter()
               for (const key in fmc) {
                 if (Object.prototype.hasOwnProperty.call(fmc, key)) {
                   frontmatter[key] = fmc[key];
                 }
               }
-            } catch (e) {
-              loadingModal.close();
-              new ErrorModal(app, e).open();
-            } finally {
-              loadingModal.close();
+            } else {
+              const modal = new MessageModal(app, {
+                title: "Metadata already exists",
+                message: "Please edit manually or use AI to generate it"
+              })
+              modal.open();
             }
           }
+          app.fileManager.processFrontMatter(file, proc);
         }
-        app.fileManager.processFrontMatter(file, proc);
       }
-    }
-  },
-
-  {
-    id: 'insert-metadata',
-    name: 'Insert metadata template',
-    callback: async () => {
-      const file = app.workspace.getActiveFile();
-      if (file) {
-
-        const proc = (frontmatter: any) => {
-          if (frontmatter === null || Object.values(frontmatter).length === 0) {
-            const fmc:any = fm.emptyFrontmatter()
-            for (const key in fmc) {
-              if (Object.prototype.hasOwnProperty.call(fmc, key)) {
-                frontmatter[key] = fmc[key];
-              }
-            }
-          } else {
-            const modal = new MessageModal(app, { title: "Metadata already exists", message: "Please edit manually or use AI to generate it" })
-            modal.open();
-          }
-        }
-
-        app.fileManager.processFrontMatter(file, proc);
-      }
-    }
-  },
-  ]
+    },
+  ];
 }

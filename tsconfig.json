@@ -22,5 +22,5 @@
   },
   "include": [
     "**/*.ts"
-  ]
+, "src/actions/index.ts"  ]
 }

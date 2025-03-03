@@ -1,8 +1,9 @@
 import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { getActions } from './src/action';
+import { getActions } from './src/actions';
 import { QuailPluginSettings } from './src/interface';
 import { Client, AuxiliaClient } from 'quail-js';
 import { startLoginElectron, refreshToken } from './src/oauth/oauth';
+
 
 import manifest from './manifest.json';
 
