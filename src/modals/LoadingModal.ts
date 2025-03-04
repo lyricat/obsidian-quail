@@ -30,16 +30,21 @@ export class LoadingModal extends Modal {
     const {contentEl} = this;
     this.asciiArtElement = document.createElement('pre');
     this.asciiArtElement.className = 'loading-ascii-art';
-    this.asciiArtElement.style.textAlign = 'center';
-    this.asciiArtElement.style.fontSize = '40px';
-    this.asciiArtElement.style.lineHeight = '1.2';
-    this.asciiArtElement.style.margin = '20px 0';
+    Object.assign(this.asciiArtElement.style, {
+      fontSize: '40px',
+      lineHeight: '1.2',
+      margin: '1rem 0',
+      textAlign: 'center',
+    });
     contentEl.appendChild(this.asciiArtElement);
 
     this.loadingTextElement = document.createElement('p');
     this.loadingTextElement.className = 'text-center loading-text';
-    this.loadingTextElement.style.marginTop = '10px';
-    this.loadingTextElement.style.transition = 'opacity 0.3s ease';
+    Object.assign(this.loadingTextElement.style, {
+      marginTop: '10px',
+      transition: 'opacity 0.3s ease',
+      fontSize: '0.7rem',
+    });
     this.loadingTextElement.setText(this.loadingTexts[this.textIndex]);
     contentEl.appendChild(this.loadingTextElement);
 

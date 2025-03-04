@@ -28,6 +28,7 @@ class QuailSettingTab extends PluginSettingTab {
 				.setDesc('You are logged in as ' + this.plugin.settings.me.email)
 				.addButton(button => button
 					.setButtonText('Logout')
+          .setWarning()
 					.onClick(async () => {
 						await this.plugin.clearTokens();
 						this.display();
@@ -35,17 +36,17 @@ class QuailSettingTab extends PluginSettingTab {
 				)
 		} else {
 			new Setting(containerEl)
-			.setHeading()
-			.setName('Login to Quaily')
-			.setDesc('Please login to use the plugin')
-			.addButton(button => button
-				.setCta()
-				.setButtonText('Login')
-				.onClick(async () => {
-					await this.plugin.login();
-					this.display();
-				})
-			)
+        .setHeading()
+        .setName('Login to Quaily')
+        .setDesc('Please login to use the plugin')
+        .addButton(button => button
+          .setCta()
+          .setButtonText('Login')
+          .onClick(async () => {
+            await this.plugin.login();
+            this.display();
+          })
+        )
 		}
 
 		const chSec = new Setting(containerEl)
