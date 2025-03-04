@@ -10,8 +10,7 @@ export default function send(app: App, client: any, settings: QuailPluginSetting
     callback: async () => {
       const { frontmatter, err } = await util.getActiveFileContent(app);
       if (err != null) {
-        // @TODO: use error modal
-        new MessageModal(app, { message: err.toString() }).open();
+        new ErrorModal(app, new Error(err.toString())).open();
         return;
       }
 

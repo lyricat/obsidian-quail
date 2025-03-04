@@ -8,6 +8,8 @@ import save from './save';
 import publish from './publish';
 import unpublish from './unpublish';
 import send from './send';
+import setChannel from './set-channel';
+import insertMetadata from './insert-metadata';
 
 async function uploadAttachment(client: any, image: any) {
   const formData = new FormData();
@@ -22,8 +24,7 @@ async function uploadAttachment(client: any, image: any) {
 async function arrangeArticle(app: App, client: any, settings: QuailPluginSettings) {
   const { title, content, frontmatter: frontmatterO, images, err } = await util.getActiveFileContent(app);
   if (err != null) {
-    // @TODO: use error modal
-    new MessageModal(app, { message: err.toString() }).open();
+    new ErrorModal(app, new Error(err.toString())).open();
     return { frontmatter: null, content: null};
   }
 
@@ -77,6 +78,7 @@ async function arrangeArticle(app: App, client: any, settings: QuailPluginSettin
     content: newContent,
   }
 }
+
 
 export async function savePost(app: App, client: any, auxiliaClient:any, settings: QuailPluginSettings) {
   const { title, frontmatter, content } = await arrangeArticle(app, client, settings);
@@ -184,33 +186,7 @@ export function getActions(plugin: any) {
     save(app, client, auxiliaClient, settings),
     send(app, client, settings),
     aigen(app, auxiliaClient),
-    {
-      id: 'insert-metadata',
-      name: 'Insert metadata template',
-      callback: async () => {
-        const file = app.workspace.getActiveFile();
-        if (file) {
-          const proc = (frontmatter: any) => {
-            if (frontmatter === null || Object.values(frontmatter).length === 0) {
-              const fmc:any = fm.emptyFrontmatter()
-              for (const key in fmc) {
-                if (Object.prototype.hasOwnProperty.call(fmc, key)) {
-                  frontmatter[key] = fmc[key];
-                }
-              }
-            } else {
-              const modal = new MessageModal(app, {
-                title: "Metadata already exists",
-                message: "Please edit manually or use AI to generate it",
-                icon: "🔔",
-                iconColor: "orange"
-              })
-              modal.open();
-            }
-          }
-          app.fileManager.processFrontMatter(file, proc);
-        }
-      }
-    },
+    setChannel(app, settings, plugin.saveSettings.bind(plugin)),
+    insertMetadata(app),
   ];
 }
