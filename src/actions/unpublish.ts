@@ -22,7 +22,9 @@ export default function unpublish(app: App, client: any, settings: QuailPluginSe
         console.log("unpublish: ", frontmatter?.slug)
         new MessageModal(app, {
           title: "Unpublish",
-          message: "This post has removed from published list."
+          message: "This post has been unpublished. It's non-visible on your readers.",
+          icon: '📕',
+          iconColor: 'red'
         }).open();
       } catch (e) {
         loadingModal.close();

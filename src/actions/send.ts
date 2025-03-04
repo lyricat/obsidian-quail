@@ -10,6 +10,7 @@ export default function send(app: App, client: any, settings: QuailPluginSetting
     callback: async () => {
       const { frontmatter, err } = await util.getActiveFileContent(app);
       if (err != null) {
+        // @TODO: use error modal
         new MessageModal(app, { message: err.toString() }).open();
         return;
       }
@@ -20,8 +21,9 @@ export default function send(app: App, client: any, settings: QuailPluginSetting
       try {
         await client.deliverPost(settings.listID, frontmatter?.slug)
         new MessageModal(app, {
-          title: "Delivery Requested",
-          message: "This post has been added into the delivery queue. It may take a few minutes to send out."
+          title: "Sending to Quaily",
+          message: "This post has been added into the sending queue. It may take a few minutes to send out.",
+          icon: '🚀',
         }).open();
       } catch (e) {
         loadingModal.close();

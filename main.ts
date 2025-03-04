@@ -1,11 +1,9 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Plugin } from 'obsidian';
 import { getActions } from './src/actions';
 import { QuailPluginSettings } from './src/interface';
 import { Client, AuxiliaClient } from 'quail-js';
 import { startLoginElectron, refreshToken } from './src/oauth/oauth';
-
-
-import manifest from './manifest.json';
+import QuailSettingTab from './src/setting';
 
 const DEFAULT_SETTINGS: QuailPluginSettings = {
 	listID: '',
@@ -20,7 +18,7 @@ const DEFAULT_SETTINGS: QuailPluginSettings = {
 	lists: [],
 }
 
-export default class QuailPlugin extends Plugin {
+export default class QuailPlugin extends Plugin implements QuailPlugin {
 	settings: QuailPluginSettings;
 	client: any;
 	auxiliaClient: any;
@@ -124,14 +122,11 @@ export default class QuailPlugin extends Plugin {
 
 	async login() {
 		try {
-			console.log("login: oauth flow start");
+			console.log("plugin.login: oauth flow start");
 			// Start the login flow in a popup
 			const token = await startLoginElectron();
 			// if your auth server is at localhost:8080
-			console.log("login: oauth flow success!", token);
-			console.log("login: access token:", token.access_token);
-			console.log("login: refresh token:", token.refresh_token);
-			console.log("login: token expiry:", token.expiry);
+			console.log("plugin.login: token expiry:", token.expiry);
 			this.settings.accessToken = token.access_token;
 			this.settings.refreshToken = token.refresh_token;
 			this.settings.tokenExpiry = token.expiry;
@@ -158,14 +153,13 @@ export default class QuailPlugin extends Plugin {
 
 	async refreshToken() {
 		try {
-			console.log("refreshToken: refresh flow start");
+			console.log("plugin.refreshToken: refresh flow start");
 			// Start the login flow in a popup
 			const token = await refreshToken(this.settings.refreshToken)
 			// if your auth server is at localhost:8080
-			console.log("refreshToken: refresh success!", token);
-			console.log("refreshToken: access token:", token.access_token);
-			console.log("refreshToken: refresh token:", token.refresh_token);
-			console.log("refreshToken: token expiry:", token.expiry);
+			// console.log("plugin.refreshToken: access token:", token.access_token);
+			// console.log("plugin.refreshToken: refresh token:", token.refresh_token);
+			console.log("plugin.refreshToken: token expiry:", token.expiry);
 			this.settings.accessToken = token.access_token;
 			this.settings.refreshToken = token.refresh_token;
 			this.settings.tokenExpiry = token.expiry;
@@ -212,137 +206,6 @@ export default class QuailPlugin extends Plugin {
 			}
 		} else {
 			this.clearTokens();
-		}
-	}
-}
-
-class QuailSettingTab extends PluginSettingTab {
-	plugin: QuailPlugin;
-
-	showDebugCounter = 0;
-	showDebugSection = false;
-
-	constructor(app: App, plugin: QuailPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		containerEl.createEl("h5", { text: "Quaily" });
-
-		if (this.plugin.isLogged()) {
-			new Setting(containerEl)
-				.setHeading()
-				.setName('Hello, ' + this.plugin.settings.me.name)
-				.setDesc('You are logged in as ' + this.plugin.settings.me.email)
-				.addButton(button => button
-					.setButtonText('Logout')
-					.onClick(async () => {
-						await this.plugin.clearTokens();
-						this.display();
-					})
-				)
-		} else {
-			new Setting(containerEl)
-			.setHeading()
-			.setName('Login to Quaily')
-			.setDesc('Please login to use the plugin')
-			.addButton(button => button
-				.setCta()
-				.setButtonText('Login')
-				.onClick(async () => {
-					await this.plugin.login();
-					this.display();
-				})
-			)
-		}
-
-		const chSec = new Setting(containerEl)
-			.setName('Channel')
-			.setDesc('Select the channel you want to use')
-		if (this.plugin.settings.lists?.length !== 0) {
-			chSec.addDropdown(dropdown => {
-				if (this.plugin.settings.lists?.length === 0) {
-					dropdown.addOption('none', 'No channel found');
-				} else {
-					for (let ix = 0; ix < this.plugin.settings.lists.length; ix++) {
-						const list = this.plugin.settings.lists[ix];
-						dropdown.addOption(list.id, list.title);
-					}
-				}
-				dropdown.setValue(this.plugin.settings.listID);
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.listID = value;
-					await this.plugin.saveSettings();
-				});
-			})
-		} else {
-			chSec.addButton(button => button
-				.setCta()
-				.setButtonText('Create a channel')
-				.onClick(async () => {
-					window.open('https://quaily.com/dashboard', '_blank');
-				})
-			)
-
-		}
-
-		containerEl.createEl("h6", { text: "Editor" });
-
-
-		new Setting(containerEl)
-			.setName('Strict line breaks')
-			.setDesc('Markdown specs ignore single line breaks. If you want to keep them, enable this option.')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.strictLineBreaks)
-				.onChange(async (value) => {
-					this.plugin.settings.strictLineBreaks = value;
-					await this.plugin.saveSettings();
-				}));
-
-		const version = containerEl.createDiv({
-			cls: "setting-item",
-		});
-
-		version.innerText = `version: ${manifest.version}`;
-		version.style.fontSize = "0.8em";
-		version.style.width = "100%";
-		version.style.textAlign = "left";
-		version.style.color = "gray";
-		version.onclick = () => {
-			if (this.showDebugCounter === 4) {
-				this.showDebugSection = !this.showDebugSection;
-				this.showDebugCounter = 0;
-				this.display();
-			}
-			this.showDebugCounter++;
-		}
-
-		if (this.showDebugSection) {
-			// debug section
-			containerEl.createEl("h6", { text: "Debug" });
-
-			const textareaContainer = containerEl.createDiv({
-				cls: "setting-item",
-			});
-
-			const textarea = textareaContainer.createEl("textarea", {
-				cls: "setting-item-control",
-				attr: { placeholder: "Enter your settings here...", disabled: "true" },
-			});
-
-			textarea.style.width = "100%";
-			textarea.style.height = "200px";
-			textarea.style.textAlign = "left";
-			textarea.value = `list id: ${this.plugin.settings.listID}
-list slug: ${this.plugin.settings.listSlug}
-access token: ${this.plugin.settings.accessToken}
-refresh token: ${this.plugin.settings.refreshToken}
-token expiry: ${this.plugin.settings.tokenExpiry}`;
 		}
 	}
 }

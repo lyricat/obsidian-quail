@@ -22,6 +22,7 @@ async function uploadAttachment(client: any, image: any) {
 async function arrangeArticle(app: App, client: any, settings: QuailPluginSettings) {
   const { title, content, frontmatter: frontmatterO, images, err } = await util.getActiveFileContent(app);
   if (err != null) {
+    // @TODO: use error modal
     new MessageModal(app, { message: err.toString() }).open();
     return { frontmatter: null, content: null};
   }
@@ -200,7 +201,9 @@ export function getActions(plugin: any) {
             } else {
               const modal = new MessageModal(app, {
                 title: "Metadata already exists",
-                message: "Please edit manually or use AI to generate it"
+                message: "Please edit manually or use AI to generate it",
+                icon: "🔔",
+                iconColor: "orange"
               })
               modal.open();
             }

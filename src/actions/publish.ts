@@ -37,7 +37,8 @@ export default function publish(app: App, client: any, auxiliaClient: any, setti
           const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
           new PublishResultModal(app, client, viewUrl, pt.title, pt.summary	, pt.cover_image_url).open();
         } else {
-          new MessageModal(app, { message: "resp.slug is empty." }).open();
+          // @TODO: replace to error modal
+          new MessageModal(app, { message: "resp.slug is empty.", icon: '⛔', iconColor: 'red' }).open();
         }
       }
     }

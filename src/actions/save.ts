@@ -25,7 +25,7 @@ export default function save(app: App, client: any, auxiliaClient: any, settings
       const slug = pt?.slug || '';
       if (slug && pt?.published_at != null) {
         const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
-        new PublishResultModal(app, client, viewUrl).open();
+        new PublishResultModal(app, client, viewUrl, pt.title, pt.summary, pt.cover_image_url).open();
       }
     }
   };
