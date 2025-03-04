@@ -21,7 +21,7 @@ async function uploadAttachment(client: any, image: any) {
   return resp.view_url
 }
 
-async function arrangeArticle(app: App, client: any, settings: QuailPluginSettings) {
+async function arrangeArticle(app: App, client: any, auxiliaClient: any, settings: QuailPluginSettings) {
   const { title, content, frontmatter: frontmatterO, images, err } = await util.getActiveFileContent(app);
   if (err != null) {
     new ErrorModal(app, new Error(err.toString())).open();
@@ -32,8 +32,25 @@ async function arrangeArticle(app: App, client: any, settings: QuailPluginSettin
 
   const { verified, reason } = fm.verifyFrontmatter(frontmatter)
   if (!verified) {
-    new MessageModal(app, {title: "Failed to verify the metadata",  message: reason }).open();
-    return { frontmatter: null, content: null};
+    new MessageModal(app, {
+      title: "Failed to verify the metadata",  message: reason,
+      icon: "🤖",
+      iconColor: "orange",
+      actions: [{
+        text: "Generate",
+        primary: true,
+        click: (dialog: any) => {
+          // TODO: generate metadata by AI
+          aigen(app, auxiliaClient).callback();
+          dialog.close();
+        }
+      },{
+        text: "Cancel",
+        close: true,
+      }]
+    }).open();
+
+    return { frontmatter: null, content: null, };
   }
 
   // upload images
@@ -81,7 +98,7 @@ async function arrangeArticle(app: App, client: any, settings: QuailPluginSettin
 
 
 export async function savePost(app: App, client: any, auxiliaClient:any, settings: QuailPluginSettings) {
-  const { title, frontmatter, content } = await arrangeArticle(app, client, settings);
+  const { title, frontmatter, content } = await arrangeArticle(app, client, auxiliaClient, settings);
   if (content == null || title == null) {
     return;
   }

@@ -23,14 +23,21 @@ export class MessageModal extends Modal {
         'dimm-2': 'rgba(13, 117, 252, .2)',
       },
     }
+    actions: any[] = [];
 
-    constructor(app: App, { title, message, icon, iconColor }: any) {
+    constructor(app: App, { title, message, icon, iconColor, actions }: any) {
       super(app);
       this.message = message;
       this.title = title || 'A Message from Quaily';
       this.icon = icon || '🤖';
       this.iconColor = iconColor || 'accent';
-      // calculate the hsl values from the iconColor
+      this.actions = actions || [{
+        text: 'OK',
+        primary: true,
+        click: () => {
+          this.close();
+        }
+      }];
     }
 
     onOpen() {
@@ -117,17 +124,34 @@ export class MessageModal extends Modal {
         display: 'flex',
         justifyContent: 'center',
         margin: '0 0 0.5rem 0',
+        gap: '0.5rem',
       });
-      const button = buttonContainer.createEl('button', {
-        text: 'OK',
-      });
-      Object.assign(button.style, {
-        minWidth: '100px'
-      });
-      button.classList.add('mod-cta');
-      button.addEventListener('click', () => {
-        this.close();
-      });
+      for (const action of this.actions) {
+        const button = buttonContainer.createEl('button', {
+          text: action.text,
+        });
+        Object.assign(button.style, {
+          minWidth: '100px'
+        });
+        if (action.primary) {
+          button.classList.add('mod-cta');
+        }
+        if (action.danger) {
+          button.classList.add('mod-warning');
+        }
+        if (action.close) {
+          button.addEventListener('click', () => {
+            this.close();
+          });
+        } else {
+          if (action.click) {
+            button.addEventListener('click', () => {
+              action.click(this);
+            });
+          }
+        }
+        button.focus();
+      }
     }
 
     onClose() {

@@ -109,7 +109,7 @@ class QuailSettingTab extends PluginSettingTab {
 			this.showDebugCounter++;
 		}
 
-		if (!this.showDebugSection) {
+		if (this.showDebugSection) {
 			// debug section
 			containerEl.createEl("h6", { text: "Debug" });
 
