@@ -28,7 +28,10 @@ const aigen = function (app: App, auxiliaClient: any, settings: QuailPluginSetti
             try {
               for (const key in fmc) {
                 if (Object.prototype.hasOwnProperty.call(fmc, key)) {
-                  frontmatter[key] = fmc[key];
+                  // only update `title` and `summary`
+                  if (key === 'title' || key === 'summary') {
+                    frontmatter[key] = fmc[key];
+                  }
                 }
               }
             } catch (e) {

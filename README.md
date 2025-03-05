@@ -2,9 +2,21 @@
 
 This is a plugin for [Quaily.com](https://quaily.com), a publishing service, that allows you to publish your Obsidian notes to Quaily as newsletters or blog posts.
 
+
 ## Getting Started
 
 Please refer to the [Quaily documentation](https://docs.quaily.com/writer/obsidian-plugin.html) for more information.
+
+## Screenshots
+
+Commands:
+
+![](https://static.quail.ink/media/19zumyzr.webp)
+
+Publish Result:
+
+![](https://static.quail.ink/media/18eu4z68.webp)
+
 
 ## Features
 
