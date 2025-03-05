@@ -8,11 +8,14 @@ Please refer to the [Quaily documentation](https://docs.quaily.com/writer/obsidi
 
 ## Features
 
-Use `Ctrl/Cmd + P` to open the command palette and search for `Quail` to see all available commands.
+Use `Ctrl/Cmd + P` to open the command palette and search for `Quaily` to see all available commands.
 
+- Multiple languages support
+- Multiple channels support
 - Publish/unpublish posts to https://quaily.com
 - Deliver published posts to subscribers
 - Generate summary and tags by AI
+- Preview on mobile devices or desktop browsers
 
 ## Installation
 
