@@ -32,7 +32,7 @@ export default function insertMetadata(app: App, auxiliaClient: any, settings: Q
               icon: "🔔",
               iconColor: "orange",
               actions: [{
-                text: t('common.ai_generate'),
+                text: t('common.generate'),
                 primary: true,
                 click: (dialog: any) => {
                   aigen(app, auxiliaClient, settings).callback();
