@@ -1,7 +1,7 @@
-import { App, SuggestModal } from 'obsidian';
+import { App, Notice, SuggestModal } from 'obsidian';
 import { MessageModal, ErrorModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
-
+import { t } from 'src/i18n';
 class ChannelSuggestModal extends SuggestModal<{title: string, id: string}> {
   channelList: Array<{title: string, id: string}>;
   onSelect: (item: {title: string, id: string}) => void;
@@ -10,7 +10,7 @@ class ChannelSuggestModal extends SuggestModal<{title: string, id: string}> {
     super(app);
     this.channelList = channelList;
     this.onSelect = onSelect;
-    this.setPlaceholder("Select a channel");
+    this.setPlaceholder(t('actions.set_channel.select_channel'));
   }
 
   getSuggestions(): Array<{title: string, id: string}> {
@@ -35,8 +35,8 @@ export default function setChannel(app: App, settings: QuailPluginSettings, save
         const lists = settings.lists;
         if (!lists || lists.length === 0) {
           new MessageModal(app, {
-            title: "No Channels Found",
-            message: "You don't have any channels available.",
+            title: t('message_modal.no_channels_found.title'),
+            message: t('message_modal.no_channels_found.desc'),
             icon: "⚠️",
             iconColor: "orange"
           }).open();
@@ -54,12 +54,7 @@ export default function setChannel(app: App, settings: QuailPluginSettings, save
               settings.listID = lists[ix].id;
               settings.listSlug = lists[ix].slug;
               await saveSettings();
-              new MessageModal(app, {
-                title: "Success",
-                message: `Default channel set to: ${item.title}`,
-                icon: "✅",
-                iconColor: "green"
-              }).open();
+              new Notice(t('notices.set_channel_success', { title: item.title }));
               return;
             }
           }

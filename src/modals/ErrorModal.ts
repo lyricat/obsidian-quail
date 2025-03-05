@@ -1,6 +1,6 @@
 import { App, Modal } from 'obsidian';
 import { constructModalTitle } from './utils';
-
+import { t } from 'src/i18n';
 export class ErrorModal extends Modal {
   message = '';
 
@@ -11,14 +11,14 @@ export class ErrorModal extends Modal {
 
   onOpen() {
     const {contentEl} = this;
-    constructModalTitle(contentEl, 'Oooops, something went wrong');
+    constructModalTitle(contentEl, t('error_modal.title'));
 
     const p = document.createElement('p');
     Object.assign(p.style, {
       color: 'var(--text-muted)',
       textAlign: 'center',
     });
-    p.appendText("Error Message");
+    p.appendText(t('error_modal.message'));
 
     const pre = document.createElement('pre');
     pre.className = 'error-message';
@@ -44,7 +44,7 @@ export class ErrorModal extends Modal {
     // Visit button
     const visitButton = buttonContainer.createEl('button', {
       cls: 'mod-cta',
-      text: 'Close'
+      text: t('common.close')
     });
     Object.assign(visitButton.style, {
       minWidth: '100px'
@@ -55,16 +55,16 @@ export class ErrorModal extends Modal {
 
     // Copy link button
     const copyButton = buttonContainer.createEl('button', {
-      text: 'Copy Message'
+      text: t('error_modal.copy')
     });
     Object.assign(copyButton.style, {
       minWidth: '100px'
     });
     copyButton.onclick = async () => {
     await navigator.clipboard.writeText(this.message);
-      copyButton.setText('Copied!');
+      copyButton.setText(t('common.copied'));
       setTimeout(() => {
-        copyButton.setText('Copy Message');
+        copyButton.setText(t('error_modal.copy'));
       }, 2000);
     };
   }

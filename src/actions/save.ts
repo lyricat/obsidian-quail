@@ -1,8 +1,8 @@
-import { App } from 'obsidian';
+import { App, Notice } from 'obsidian';
 import { LoadingModal, ErrorModal, PublishResultModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
 import { savePost } from './index';
-
+import { t } from 'src/i18n';
 export default function save(app: App, client: any, auxiliaClient: any, settings: QuailPluginSettings) {
   return {
     id: 'save',
@@ -24,18 +24,17 @@ export default function save(app: App, client: any, auxiliaClient: any, settings
 
       const slug = pt?.slug || '';
       if (slug) {
-        const payload:any = {
-          title: pt.title,
-          summary: pt.summary,
-          coverImageUrl: pt.cover_image_url
-        }
         if (pt?.published_at !== null) {
-          payload.url = `https://quaily.com/${settings.listSlug}/p/${slug}`;
-          payload.scene = 'publish';
+          const payload:any = {
+            title: pt.title,
+            summary: pt.summary,
+            coverImageUrl: pt.cover_image_url,
+            url: `https://quaily.com/${settings.listSlug}/p/${slug}`
+          }
+          new PublishResultModal(app, client, payload).open();
         } else {
-          payload.scene = 'save';
+          new Notice(t('notices.post_saved'));
         }
-        new PublishResultModal(app, client, payload).open();
       }
     }
   };

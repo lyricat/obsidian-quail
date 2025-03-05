@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import { QuailPlugin } from '../interface';
 import manifest from '../../manifest.json';
 import { ErrorModal, LoadingModal, MessageModal, PublishResultModal } from 'src/modals';
+import { t } from 'src/i18n';
 
 class QuailSettingTab extends PluginSettingTab {
 	plugin: QuailPlugin;
@@ -24,10 +25,10 @@ class QuailSettingTab extends PluginSettingTab {
 		if (this.plugin.isLogged()) {
 			new Setting(containerEl)
 				.setHeading()
-				.setName('Hello, ' + this.plugin.settings.me.name)
-				.setDesc('You are logged in as ' + this.plugin.settings.me.email)
+				.setName(t('settings.account.logged.title', {name: this.plugin.settings.me.name}))
+				.setDesc(t('settings.account.logged.desc', {email: this.plugin.settings.me.email}))
 				.addButton(button => button
-					.setButtonText('Logout')
+					.setButtonText(t('common.logout'))
           .setWarning()
 					.onClick(async () => {
 						await this.plugin.clearTokens();
@@ -37,11 +38,11 @@ class QuailSettingTab extends PluginSettingTab {
 		} else {
 			new Setting(containerEl)
         .setHeading()
-        .setName('Login to Quaily')
-        .setDesc('Please login to use the plugin')
+        .setName(t('settings.account.need_to_login.title'))
+        .setDesc(t('settings.account.need_to_login.desc'))
         .addButton(button => button
           .setCta()
-          .setButtonText('Login')
+          .setButtonText(t('common.login'))
           .onClick(async () => {
             await this.plugin.login();
             this.display();
@@ -50,12 +51,12 @@ class QuailSettingTab extends PluginSettingTab {
 		}
 
 		const chSec = new Setting(containerEl)
-			.setName('Channel')
-			.setDesc('Select the channel you want to use')
+			.setName(t('settings.channel.title'))
+			.setDesc(t('settings.channel.desc'))
 		if (this.plugin.settings.lists?.length !== 0) {
 			chSec.addDropdown(dropdown => {
 				if (this.plugin.settings.lists?.length === 0) {
-					dropdown.addOption('none', 'No channel found');
+					dropdown.addOption('none', t('settings.channel.empty'));
 				} else {
 					for (let ix = 0; ix < this.plugin.settings.lists.length; ix++) {
 						const list = this.plugin.settings.lists[ix];
@@ -72,7 +73,7 @@ class QuailSettingTab extends PluginSettingTab {
 		} else {
 			chSec.addButton(button => button
 				.setCta()
-				.setButtonText('Create a channel')
+				.setButtonText(t('settings.channel.create'))
 				.onClick(async () => {
 					window.open('https://quaily.com/dashboard', '_blank');
 				})
@@ -83,8 +84,8 @@ class QuailSettingTab extends PluginSettingTab {
 
 
 		new Setting(containerEl)
-			.setName('Strict line breaks')
-			.setDesc('Markdown specs ignore single line breaks. If you want to keep them, enable this option.')
+			.setName(t('settings.editor.strict_line_breaks.title'))
+			.setDesc(t('settings.editor.strict_line_breaks.desc'))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.strictLineBreaks)
 				.onChange(async (value) => {
@@ -110,7 +111,7 @@ class QuailSettingTab extends PluginSettingTab {
 			this.showDebugCounter++;
 		}
 
-		if (!this.showDebugSection) {
+		if (this.showDebugSection) {
 			// debug section
 			containerEl.createEl("h6", { text: "Debug" });
 
@@ -138,7 +139,6 @@ token expiry: ${this.plugin.settings.tokenExpiry}`;
         .setButtonText('Publish')
         .onClick(async () => {
           new PublishResultModal(this.app, null, {
-
 						url: "https://quaily.com",
 						title: "This is a test title",
 						summary: "This is a test summary. The gray fox jumps over the lazy dog.",

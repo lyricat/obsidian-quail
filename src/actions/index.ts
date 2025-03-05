@@ -5,11 +5,13 @@ import { QuailPluginSettings } from '../interface';
 import fm from "../frontmatter";
 import aigen from './aigen';
 import save from './save';
+import preview from './preview';
 import publish from './publish';
 import unpublish from './unpublish';
 import send from './send';
 import setChannel from './set-channel';
 import insertMetadata from './insert-metadata';
+import { t } from 'src/i18n';
 
 async function uploadAttachment(client: any, image: any) {
   const formData = new FormData();
@@ -33,19 +35,19 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
   const { verified, reason } = fm.verifyFrontmatter(frontmatter)
   if (!verified) {
     new MessageModal(app, {
-      title: "Failed to verify the metadata",  message: reason,
+      title: t('message_modal.failed_to_verify_meta.title'),
+      message: reason,
       icon: "🤖",
       iconColor: "orange",
       actions: [{
-        text: "Generate",
+        text: t('common.ai_generate'),
         primary: true,
         click: (dialog: any) => {
-          // TODO: generate metadata by AI
           aigen(app, auxiliaClient).callback();
           dialog.close();
         }
       },{
-        text: "Cancel",
+        text: t('common.cancel'),
         close: true,
       }]
     }).open();
@@ -114,7 +116,6 @@ export async function savePost(app: App, client: any, auxiliaClient:any, setting
   }
 
   if (!checkMetadata(frontmatter)) {
-    console.log("some metadata is empty, try to generate it by AI")
     const file = app.workspace.getActiveFile();
     if (file) {
       // try to generate metadata
@@ -201,9 +202,10 @@ export function getActions(plugin: any) {
     publish(app, client, auxiliaClient, settings),
     unpublish(app, client, settings),
     save(app, client, auxiliaClient, settings),
+    preview(app, client, auxiliaClient, settings),
     send(app, client, settings),
     aigen(app, auxiliaClient),
     setChannel(app, settings, plugin.saveSettings.bind(plugin)),
-    insertMetadata(app),
+    insertMetadata(app, auxiliaClient),
   ];
 }

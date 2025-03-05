@@ -1,0 +1,59 @@
+{
+  "common.ok": "OK",
+  "common.cancel": "Cancel",
+  "common.close": "Close",
+  "common.login": "Login",
+  "common.logout": "Logout",
+  "common.copied": "Copied",
+  "common.generate": "Generate",
+  "error_modal.title": "Oooops, something went wrong",
+  "error_modal.error_message": "Error Message",
+  "error_modal.copy": "Copy message",
+  "message_modal.title": "A Message from Quaily",
+
+  "preview_modal.title": "Preview Your Post",
+  "preview_modal.hint": "Preview will be expired in 10 minutes. Don't share the link with others.",
+  "preview_modal.mobile.title": "📱 Preview on mobile",
+  "preview_modal.mobile.desc": "Scan the QRcode to preview on the mobile device",
+  "preview_modal.desktop.title": "💻 Preview on desktop",
+  "preview_modal.desktop.desc": "Click to preview in the browser",
+  "preview_modal.preview": "Preview",
+
+  "publish_result_modal.title": "🎉 Successfully Published!",
+  "publish_result_modal.copy_link": "Copy link",
+  "publish_result_modal.visit_post": "View Post",
+
+  "loading_modal.text.loading": "Loading",
+  "loading_modal.text.still_loading": "Still loading",
+  "loading_modal.text.almost_there": "Almost there",
+  "loading_modal.text.just_a_moment": "Just a moment",
+  "loading_modal.text.working_on_it": "Working on it",
+
+  "message_modal.failed_to_verify_meta.title": "Failed to verify the metadata",
+  "message_modal.metadata_exists.title": "Metadata already exists",
+  "message_modal.metadata_exists.desc": "Please edit manually or use AI to generate it",
+  "message_modal.send_post.title": "Sending by Quaily",
+  "message_modal.send_post.desc": "This post has been added into the sending queue. It may take a few minutes to send out.",
+  "message_modal.no_channels_found.title": "No Channel",
+  "message_modal.no_channels_found.desc": "Please create a channel at first.",
+
+
+  "notices.post_saved": "✅ Post saved!",
+  "notices.set_channel_success": "✅ {title} is the default channel.",
+  "notices.unpublish_success": "📕 This post has been unpublished. No more visible to readers.",
+
+  "actions.ai_gen_metadata": "Generate Meta by AI",
+  "actions.set_channel.select_channel": "Select a channel",
+
+  "settings.account.logged.title": "Hello, {name}",
+  "settings.account.logged.desc": "You are logged in as {email}",
+  "settings.account.need_to_login.title": "Login to Quaily",
+  "settings.account.need_to_login.desc": "Please login to use the plugin",
+  "settings.channel.title": "Channel",
+  "settings.channel.desc": "Select the channel you want to use",
+  "settings.channel.create": "Create a channel",
+  "settings.channel.empty": "No channel",
+  "settings.editor": "Editor",
+  "settings.editor.strict_line_breaks.title": "Strict line breaks",
+  "settings.editor.strict_line_breaks.desc": "Markdown specs ignore single line breaks. If you want to keep them, enable this option."
+}

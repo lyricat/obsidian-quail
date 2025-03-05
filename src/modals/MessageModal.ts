@@ -1,5 +1,5 @@
 import { App, Modal } from 'obsidian';
-
+import { t } from 'src/i18n';
 export class MessageModal extends Modal {
     message = '';
     title = '';
@@ -28,11 +28,11 @@ export class MessageModal extends Modal {
     constructor(app: App, { title, message, icon, iconColor, actions }: any) {
       super(app);
       this.message = message;
-      this.title = title || 'A Message from Quaily';
+      this.title = title || t('message_modal.title');
       this.icon = icon || '🤖';
       this.iconColor = iconColor || 'accent';
       this.actions = actions || [{
-        text: 'OK',
+        text: t('common.ok'),
         primary: true,
         click: () => {
           this.close();

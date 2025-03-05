@@ -1,7 +1,9 @@
-import { App } from 'obsidian';
+import { App, Notice } from 'obsidian';
 import { QuailPluginSettings } from '../interface';
-import { LoadingModal, MessageModal, ErrorModal } from '../modals';
+import { LoadingModal, ErrorModal } from '../modals';
 import util from '../util';
+import { t } from 'src/i18n';
+
 
 export default function unpublish(app: App, client: any, settings: QuailPluginSettings) {
   return {
@@ -19,13 +21,7 @@ export default function unpublish(app: App, client: any, settings: QuailPluginSe
 
       try {
         await client.unpublishPost(settings.listID, frontmatter?.slug);
-        console.log("unpublish: ", frontmatter?.slug)
-        new MessageModal(app, {
-          title: "Unpublish",
-          message: "This post has been unpublished. It's non-visible on your readers.",
-          icon: '📕',
-          iconColor: 'red'
-        }).open();
+        new Notice(t('notices.unpublish_success'));
       } catch (e) {
         loadingModal.close();
         new ErrorModal(app, e).open();

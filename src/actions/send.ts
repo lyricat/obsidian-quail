@@ -2,7 +2,7 @@ import { App } from 'obsidian';
 import { QuailPluginSettings } from '../interface';
 import { LoadingModal, MessageModal, ErrorModal } from '../modals';
 import util from '../util';
-
+import { t } from 'src/i18n';
 export default function send(app: App, client: any, settings: QuailPluginSettings) {
   return {
     id: 'deliver',
@@ -20,13 +20,12 @@ export default function send(app: App, client: any, settings: QuailPluginSetting
       try {
         await client.deliverPost(settings.listID, frontmatter?.slug)
         new MessageModal(app, {
-          title: "Sending to Quaily",
-          message: "This post has been added into the sending queue. It may take a few minutes to send out.",
+          title: t('message_modal.send_post.title'),
+          message: t('message_modal.send_post.desc'),
           icon: '🚀',
         }).open();
       } catch (e) {
         loadingModal.close();
-        console.log("deliver error: ", e)
         new ErrorModal(app, e).open();
         return;
       } finally {

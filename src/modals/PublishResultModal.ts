@@ -1,8 +1,8 @@
 import { App, Modal } from 'obsidian';
 import { constructModalTitle } from './utils';
+import { t } from 'src/i18n';
 
 export class PublishResultModal extends Modal {
-  scene: string;
   dialogTitle: string;
   url: string;
   title: string;
@@ -12,9 +12,8 @@ export class PublishResultModal extends Modal {
 
   constructor(app: App, client: any, {scene, url, title, summary, coverImageUrl }: { scene?: string, url: string, title?: string, summary?: string, coverImageUrl?: string }) {
     super(app);
-    this.scene = scene || 'publish';
     this.url = url;
-    this.dialogTitle = scene  === 'publish' ? 'Successfully Published! 🎉' : 'Post Saved. 💾';
+    this.dialogTitle = t('publish_result_modal.title');
     this.title = title || '';
     this.summary = summary || '';
     this.coverImageUrl = coverImageUrl || null;
@@ -105,27 +104,24 @@ export class PublishResultModal extends Modal {
     }
 
     // Add URL with link
-    if (this.scene === 'publish') {
-      const urlContainer = container.createDiv();
-      Object.assign(urlContainer.style, {
-        background: 'var(--background-secondary)',
-        padding: '0.75rem',
-        borderRadius: '6px',
-        margin: '1rem 0',
-        wordBreak: 'break-all'
-      });
+    const urlContainer = container.createDiv();
+    Object.assign(urlContainer.style, {
+      background: 'var(--background-secondary)',
+      padding: '0.75rem',
+      borderRadius: '6px',
+      margin: '1rem 0',
+      wordBreak: 'break-all'
+    });
 
-      const urlLink = urlContainer.createEl('a', {
-        href: this.url,
-        text: this.url
-      });
-      Object.assign(urlLink.style, {
-      color: 'var(--text-accent)',
-        textDecoration: 'none'
-      });
-      urlLink.setAttribute('target', '_blank');
-    }
-
+    const urlLink = urlContainer.createEl('a', {
+      href: this.url,
+      text: this.url
+    });
+    Object.assign(urlLink.style, {
+    color: 'var(--text-accent)',
+      textDecoration: 'none'
+    });
+    urlLink.setAttribute('target', '_blank');
 
     // Add action buttons
     const buttonContainer = container.createDiv();
@@ -136,47 +132,33 @@ export class PublishResultModal extends Modal {
       marginBottom: '0.5rem'
     });
 
-    if (this.scene === 'publish') {
-      // Visit button
-      const visitButton = buttonContainer.createEl('button', {
-        cls: 'mod-cta',
-        text: 'Visit Post'
-      });
-      Object.assign(visitButton.style, {
-        minWidth: '100px'
-      });
-      visitButton.onclick = () => {
-        window.open(this.url, '_blank');
-        this.close();
-      };
+    // Copy link button
+    const copyButton = buttonContainer.createEl('button', {
+      text: t('publish_result_modal.copy_link')
+    });
+    Object.assign(copyButton.style, {
+      minWidth: '100px'
+    });
+    copyButton.onclick = async () => {
+      await navigator.clipboard.writeText(this.url);
+      copyButton.setText(t('common.copied'));
+      setTimeout(() => {
+        copyButton.setText(t('publish_result_modal.copy_link'));
+      }, 2000);
+    };
+    // Visit button
+    const visitButton = buttonContainer.createEl('button', {
+      cls: 'mod-cta',
+      text: t('publish_result_modal.visit_post')
+    });
+    Object.assign(visitButton.style, {
+      minWidth: '100px'
+    });
+    visitButton.onclick = () => {
+      window.open(this.url, '_blank');
+      this.close();
+    };
 
-      // Copy link button
-      const copyButton = buttonContainer.createEl('button', {
-        text: 'Copy Link'
-      });
-      Object.assign(copyButton.style, {
-        minWidth: '100px'
-      });
-      copyButton.onclick = async () => {
-        await navigator.clipboard.writeText(this.url);
-        copyButton.setText('Copied!');
-        setTimeout(() => {
-          copyButton.setText('Copy Link');
-        }, 2000);
-      };
-    } else {
-      // Save button
-      const button = buttonContainer.createEl('button', {
-        cls: 'mod-cta',
-        text: 'Ok'
-      });
-      Object.assign(button.style, {
-        minWidth: '100px'
-      });
-      button.onclick = () => {
-        this.close();
-      };
-    }
   }
 
   onClose() {

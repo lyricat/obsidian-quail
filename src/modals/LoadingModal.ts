@@ -1,4 +1,5 @@
 import { App, Modal } from 'obsidian';
+import { t } from 'src/i18n';
 
 export class LoadingModal extends Modal {
   private loadingInterval: number | null = null;
@@ -10,11 +11,11 @@ export class LoadingModal extends Modal {
   private loadingTextElement: HTMLElement | null = null;
   private asciiArtElement: HTMLElement | null = null;
   private loadingTexts = [
-    "Loading...",
-    "Still loading...",
-    "Almost there...",
-    "Just a moment...",
-    "Working on it..."
+    t('loading_modal.text.loading'),
+    t('loading_modal.text.still_loading'),
+    t('loading_modal.text.almost_there'),
+    t('loading_modal.text.just_a_moment'),
+    t('loading_modal.text.working_on_it')
   ];
   private textIndex = 0;
   private textOpacity = 1.0;
