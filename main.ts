@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS: QuailPluginSettings = {
 	listID: '',
 	listSlug: '',
 	strictLineBreaks: true,
+	useEnglishCmds: false,
 	// tokens
 	accessToken: '',
 	refreshToken: '',

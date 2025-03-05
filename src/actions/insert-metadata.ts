@@ -1,13 +1,19 @@
 import { App } from 'obsidian';
 import { MessageModal } from '../modals';
 import fm from '../frontmatter';
-import { t } from 'src/i18n';
+import { t, english } from 'src/i18n';
 import aigen from './aigen';
+import { QuailPluginSettings } from 'src/interface';
 
-export default function insertMetadata(app: App, auxiliaClient: any) {
+export default function insertMetadata(app: App, auxiliaClient: any, settings: QuailPluginSettings) {
+  let name = english('actions.insert_metadata');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.insert_metadata');
+  }
+
   return {
     id: 'insert-metadata',
-    name: 'Insert metadata template',
+    name: name,
     callback: async () => {
       const file = app.workspace.getActiveFile();
       if (file) {
@@ -29,7 +35,7 @@ export default function insertMetadata(app: App, auxiliaClient: any) {
                 text: t('common.ai_generate'),
                 primary: true,
                 click: (dialog: any) => {
-                  aigen(app, auxiliaClient).callback();
+                  aigen(app, auxiliaClient, settings).callback();
                   dialog.close();
                 }
               },{

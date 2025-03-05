@@ -1,7 +1,7 @@
 import { App, Notice, SuggestModal } from 'obsidian';
 import { MessageModal, ErrorModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
-import { t } from 'src/i18n';
+import { t, english } from 'src/i18n';
 class ChannelSuggestModal extends SuggestModal<{title: string, id: string}> {
   channelList: Array<{title: string, id: string}>;
   onSelect: (item: {title: string, id: string}) => void;
@@ -27,9 +27,14 @@ class ChannelSuggestModal extends SuggestModal<{title: string, id: string}> {
 }
 
 export default function setChannel(app: App, settings: QuailPluginSettings, saveSettings: () => Promise<void>) {
+  let name = english('actions.set_channel');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.set_channel');
+  }
+
   return {
     id: 'quail-set-channel',
-    name: 'Set Default Channel',
+    name: name,
     callback: async () => {
       try {
         const lists = settings.lists;

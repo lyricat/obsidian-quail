@@ -10,6 +10,7 @@ export interface QuailPluginSettings {
 	lists: any;
 
 	strictLineBreaks: boolean;
+	useEnglishCmds: boolean;
 }
 
 export interface QuailImageItem {

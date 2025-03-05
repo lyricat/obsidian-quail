@@ -2,12 +2,16 @@ import { App, Notice } from 'obsidian';
 import { ErrorModal, LoadingModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
 import { PreviewModal } from '../modals';
-
+import { t, english } from 'src/i18n';
 export default function preview(app: App, client: any, auxiliaClient: any, settings: QuailPluginSettings) {
+  let name = english('actions.preview');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.preview');
+  }
+
   return {
     id: 'quail-preview',
-    name: 'Preview Post',
-    icon: 'eye',
+    name: name,
     callback: async () => {
       const loadingModal = new LoadingModal(app);
       loadingModal.open();

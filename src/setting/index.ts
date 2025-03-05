@@ -80,8 +80,20 @@ class QuailSettingTab extends PluginSettingTab {
 			)
 		}
 
-		containerEl.createEl("h6", { text: "Editor" });
+		containerEl.createEl("h6", { text: t('settings.commands') });
 
+		new Setting(containerEl)
+			.setName(t('settings.commands.use_english_cmds.title'))
+			.setDesc(t('settings.commands.use_english_cmds.desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useEnglishCmds)
+				.onChange(async (value) => {
+					this.plugin.settings.useEnglishCmds = value;
+					await this.plugin.saveSettings();
+				}));
+
+
+		containerEl.createEl("h6", { text: t('settings.editor') });
 
 		new Setting(containerEl)
 			.setName(t('settings.editor.strict_line_breaks.title'))

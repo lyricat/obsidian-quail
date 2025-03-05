@@ -2,11 +2,16 @@ import { App } from 'obsidian';
 import { QuailPluginSettings } from '../interface';
 import { LoadingModal, MessageModal, ErrorModal } from '../modals';
 import util from '../util';
-import { t } from 'src/i18n';
+import { english, t } from 'src/i18n';
 export default function send(app: App, client: any, settings: QuailPluginSettings) {
+  let name = english('actions.send');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.send');
+  }
+
   return {
     id: 'deliver',
-    name: 'Deliver',
+    name: name,
     callback: async () => {
       const { frontmatter, err } = await util.getActiveFileContent(app);
       if (err != null) {

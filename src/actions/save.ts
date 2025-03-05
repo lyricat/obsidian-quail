@@ -2,11 +2,16 @@ import { App, Notice } from 'obsidian';
 import { LoadingModal, ErrorModal, PublishResultModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
 import { savePost } from './index';
-import { t } from 'src/i18n';
+import { t, english } from 'src/i18n';
 export default function save(app: App, client: any, auxiliaClient: any, settings: QuailPluginSettings) {
+  let name = english('actions.save');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.save');
+  }
+
   return {
     id: 'save',
-    name: 'Save',
+    name: name,
     callback: async () => {
       const loadingModal = new LoadingModal(app)
       loadingModal.open();

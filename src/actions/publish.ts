@@ -2,11 +2,16 @@ import { App } from 'obsidian';
 import { LoadingModal, ErrorModal, PublishResultModal } from '../modals';
 import { QuailPluginSettings } from '../interface';
 import { savePost } from './index';
-
+import { t, english } from 'src/i18n';
 export default function publish(app: App, client: any, auxiliaClient: any, settings: QuailPluginSettings) {
+  let name = english('actions.publish');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.publish');
+  }
+
   return {
     id: 'quail-publish',
-    name: 'Publish',
+    name: name,
     callback: async () => {
       const file = app.workspace.getActiveFile();
       if (file !== null) {

@@ -2,11 +2,18 @@ import util from '../util';
 import fm from "../frontmatter";
 import { LoadingModal, ErrorModal } from '../modals';
 import { App } from 'obsidian';
+import { QuailPluginSettings } from 'src/interface';
+import { t, english } from 'src/i18n';
 
-const aigen = function (app: App, auxiliaClient: any) {
+const aigen = function (app: App, auxiliaClient: any, settings: QuailPluginSettings) {
+  let name = english('actions.ai_gen_metadata');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.ai_gen_metadata');
+  }
+
   return {
     id: 'ai-gen-metadata',
-    name: 'Generate metadata by AI',
+    name: name,
     callback: async () => {
       const content = await util.getActiveFileMarkdown(app);
       const file = app.workspace.getActiveFile();

@@ -43,7 +43,7 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
         text: t('common.ai_generate'),
         primary: true,
         click: (dialog: any) => {
-          aigen(app, auxiliaClient).callback();
+          aigen(app, auxiliaClient, settings).callback();
           dialog.close();
         }
       },{
@@ -204,8 +204,8 @@ export function getActions(plugin: any) {
     save(app, client, auxiliaClient, settings),
     preview(app, client, auxiliaClient, settings),
     send(app, client, settings),
-    aigen(app, auxiliaClient),
+    aigen(app, auxiliaClient, settings),
     setChannel(app, settings, plugin.saveSettings.bind(plugin)),
-    insertMetadata(app, auxiliaClient),
+    insertMetadata(app, auxiliaClient, settings),
   ];
 }

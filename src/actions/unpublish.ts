@@ -2,13 +2,18 @@ import { App, Notice } from 'obsidian';
 import { QuailPluginSettings } from '../interface';
 import { LoadingModal, ErrorModal } from '../modals';
 import util from '../util';
-import { t } from 'src/i18n';
+import { t, english } from 'src/i18n';
 
 
 export default function unpublish(app: App, client: any, settings: QuailPluginSettings) {
+  let name = english('actions.unpublish');
+  if (!settings.useEnglishCmds) {
+    name = t('actions.unpublish');
+  }
+
   return {
     id: 'unpublish',
-    name: 'Unpublish',
+    name: name,
     callback: async () => {
       const { frontmatter, err } = await util.getActiveFileContent(app);
       if (err != null) {

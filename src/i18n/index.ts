@@ -29,8 +29,7 @@ function detectLang() {
   }
 }
 
-function t(name: string, data?: Record<string, string>) {
-  const lang = detectLang();
+function _t(lang: string, name: string, data?: Record<string, string>) {
   const locale = messages[lang];
   let msg = "";
 
@@ -53,7 +52,18 @@ function t(name: string, data?: Record<string, string>) {
   return msg;
 }
 
+function t(name: string, data?: Record<string, string>) {
+  const lang = detectLang();
+  return _t(lang, name, data);
+}
+
+function english(name: string, data?: Record<string, string>) {
+  // always return english
+  return _t('en', name, data);
+}
+
 export {
   t,
   detectLang,
+  english,
 }
