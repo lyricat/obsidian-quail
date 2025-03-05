@@ -102,7 +102,7 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 		let found = false;
 		for (let ix = 0; ix < lists.length; ix++) {
 			const list = lists[ix];
-			if (`${list.id}` === this.settings.listID || list.slug === this.settings.listID) {
+			if (`${list.id}` === this.settings.listID || list.slug === this.settings.listSlug) {
 				found = true;
 				this.settings.listID = list.id;
 				this.settings.listSlug = list.slug;

@@ -35,7 +35,9 @@ export default function publish(app: App, client: any, auxiliaClient: any, setti
         const slug = pt.slug || '';
         if (slug) {
           const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
-          new PublishResultModal(app, client, viewUrl, pt.title, pt.summary	, pt.cover_image_url).open();
+          new PublishResultModal(app, client, {
+            url: viewUrl, title: pt.title, summary: pt.summary, coverImageUrl: pt.cover_image_url
+          }).open();
         } else {
           new ErrorModal(app, new Error("resp.slug is empty.")).open();
         }

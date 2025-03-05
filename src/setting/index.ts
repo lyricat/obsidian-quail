@@ -65,6 +65,7 @@ class QuailSettingTab extends PluginSettingTab {
 				dropdown.setValue(this.plugin.settings.listID);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.listID = value;
+					this.plugin.settings.listSlug = this.plugin.settings.lists.find((list:any) => list.id === value)?.slug || '';
 					await this.plugin.saveSettings();
 				});
 			})
@@ -109,7 +110,7 @@ class QuailSettingTab extends PluginSettingTab {
 			this.showDebugCounter++;
 		}
 
-		if (this.showDebugSection) {
+		if (!this.showDebugSection) {
 			// debug section
 			containerEl.createEl("h6", { text: "Debug" });
 
@@ -136,7 +137,13 @@ token expiry: ${this.plugin.settings.tokenExpiry}`;
       buttonsSec.addButton(button => button
         .setButtonText('Publish')
         .onClick(async () => {
-          new PublishResultModal(this.app, null, "https://quaily.com", "This is a test title", "This is a test summary. The gray fox jumps over the lazy dog.", "https://quaily.com/portal-images/illustration/finance-you-0.webp").open();
+          new PublishResultModal(this.app, null, {
+
+						url: "https://quaily.com",
+						title: "This is a test title",
+						summary: "This is a test summary. The gray fox jumps over the lazy dog.",
+						coverImageUrl: "https://quaily.com/portal-images/illustration/finance-you-0.webp"
+					}).open();
         })
       )
       buttonsSec.addButton(button => button

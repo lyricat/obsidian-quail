@@ -23,9 +23,19 @@ export default function save(app: App, client: any, auxiliaClient: any, settings
       }
 
       const slug = pt?.slug || '';
-      if (slug && pt?.published_at != null) {
-        const viewUrl = `https://quaily.com/${settings.listSlug}/p/${slug}`;
-        new PublishResultModal(app, client, viewUrl, pt.title, pt.summary, pt.cover_image_url).open();
+      if (slug) {
+        const payload:any = {
+          title: pt.title,
+          summary: pt.summary,
+          coverImageUrl: pt.cover_image_url
+        }
+        if (pt?.published_at !== null) {
+          payload.url = `https://quaily.com/${settings.listSlug}/p/${slug}`;
+          payload.scene = 'publish';
+        } else {
+          payload.scene = 'save';
+        }
+        new PublishResultModal(app, client, payload).open();
       }
     }
   };
