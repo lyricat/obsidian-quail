@@ -207,6 +207,7 @@ export default {
     const lines = content.split("\n");
     const newLines = [];
     const secondRoundLines = [];
+    const allImageURLs = [];
 
     // first round, replace ![alt](url) with ![alt](newUrl)
     // and replace ![[path]] with ![name](newUrl)
@@ -220,8 +221,10 @@ export default {
           if (urlMap[oldUrl]) {
             newLine = line.replace(`(${match[2]})`, `(${urlMap[oldUrl].newUrl})`);
             urlMap[oldUrl].used = true;
+            allImageURLs.push(urlMap[oldUrl].newUrl)
           } else {
             console.log("quaily.replaceImageUrls: ignore image", oldUrl)
+            allImageURLs.push(oldUrl)
           }
         }
       } else if (line.startsWith("![[") && line.endsWith("]]")) {
@@ -232,6 +235,7 @@ export default {
           if (urlMap[oldUrl]) {
             newLine = line.replace(`![[${match[1]}]]`, `![${name || oldUrl}](${urlMap[oldUrl].newUrl})`);
             urlMap[oldUrl].used = true;
+            allImageURLs.push(urlMap[oldUrl].newUrl)
           } else {
             secondRoundLines.push({line, index: ix});
           }
@@ -254,15 +258,20 @@ export default {
             if (urlMap[k].used === false && k.endsWith(name)) {
               newLine = line.replace(`![[${match[1]}]]`, `![${name}](${urlMap[k].newUrl})`);
               handled = true;
+              allImageURLs.push(urlMap[k].newUrl)
             }
           }
           if (!handled) {
             console.log("quaily.replaceImageUrls:ignore image", name)
+            allImageURLs.push(name)
           }
         }
       }
       newLines[index] = newLine;
     }
-    return newLines.join("\n");
+    return {
+      content: newLines.join("\n"),
+      image_urls: allImageURLs,
+    }
   },
 }

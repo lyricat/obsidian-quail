@@ -74,13 +74,6 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
     }
   }
 
-  if (frontmatter.cover_image === null && frontmatter.cover_image_url === '') {
-    // if the cover image is empty, use the first image as cover
-    if (settings.useFirstImageAsCover && newUrls.length > 0) {
-      frontmatter.cover_image_url = newUrls[0];
-    }
-  }
-
   // upload cover image
   if (frontmatter?.cover_image) {
     try {
@@ -95,8 +88,19 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
   }
 
   // replace image urls
-  const newContent = util.replaceImageUrls(content, oldUrls, newUrls).trim() || '';
+  const ret:any = util.replaceImageUrls(content, oldUrls, newUrls);
+  const newContent = ret.content.trim() || '';
+  const imageUrls = ret.image_urls.filter((url: string) => {
+    return url.startsWith('https://') || url.startsWith('http://') || url.startsWith('//')
+  })
   const fmt = fm.formalizeFrontmatter(frontmatter, newContent);
+
+  if (frontmatter.cover_image === null && frontmatter.cover_image_url === '') {
+    // if the cover image is empty, use the first image as cover
+    if (settings.useFirstImageAsCover && imageUrls.length > 0) {
+      fmt.cover_image_url = imageUrls[0];
+    }
+  }
 
   return {
     title: title,
@@ -111,6 +115,7 @@ export async function savePost(app: App, client: any, auxiliaClient:any, setting
   if (content == null || title == null) {
     return;
   }
+
 
   const checkMetadata = (fm: any) => {
     const fields = ['slug', 'summary', 'tags'];

@@ -37,7 +37,6 @@
   "message_modal.no_channels_found.title": "No Channel",
   "message_modal.no_channels_found.desc": "Please create a channel at first.",
 
-
   "notices.post_saved": "✅ Post saved!",
   "notices.set_channel_success": "✅ {title} is the default channel.",
   "notices.unpublish_success": "📕 This post has been unpublished. No more visible to readers.",

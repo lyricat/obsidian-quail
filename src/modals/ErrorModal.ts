@@ -18,7 +18,7 @@ export class ErrorModal extends Modal {
       color: 'var(--text-muted)',
       textAlign: 'center',
     });
-    p.appendText(t('error_modal.message'));
+    p.appendText(t('error_modal.error_message'));
 
     const pre = document.createElement('pre');
     pre.className = 'error-message';
