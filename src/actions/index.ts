@@ -65,12 +65,19 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
         const viewUrl = await uploadAttachment(client, img)
         newUrls.push(viewUrl)
         oldUrls.push(img.pathname)
-        console.log(`upload image: ${img.pathname}, new url: ${viewUrl}`)
+        console.log(`quaily.upload image: ${img.pathname}, new url: ${viewUrl}`)
       } catch (e) {
-        console.log("upload image error: ", e)
+        console.log("quaily.upload image error: ", e)
         new ErrorModal(app, new Error(e)).open();
         return { frontmatter: null, content: null};
       }
+    }
+  }
+
+  if (frontmatter.cover_image === null && frontmatter.cover_image_url === '') {
+    // if the cover image is empty, use the first image as cover
+    if (settings.useFirstImageAsCover && newUrls.length > 0) {
+      frontmatter.cover_image_url = newUrls[0];
     }
   }
 
@@ -79,9 +86,9 @@ async function arrangeArticle(app: App, client: any, auxiliaClient: any, setting
     try {
       const viewUrl = await uploadAttachment(client, frontmatter.cover_image)
       frontmatter.cover_image_url = viewUrl;
-      console.log(`upload cover: ${frontmatter.cover_image.pathname}, new url: ${viewUrl}`)
+      console.log(`quaily.upload cover: ${frontmatter.cover_image.pathname}, new url: ${viewUrl}`)
     } catch (e) {
-      console.log("upload cover error: ", e)
+      console.log("quaily.upload cover error: ", e)
       new ErrorModal(app, new Error(e)).open();
       return { frontmatter: null, content: null};
     }
@@ -128,7 +135,7 @@ export async function savePost(app: App, client: any, auxiliaClient:any, setting
             for (const key in fmc) {
               if (Object.prototype.hasOwnProperty.call(fmc, key)) {
                 if (frontmatter[key] === '' || frontmatter[key] === null || frontmatter[key] === undefined) {
-                  console.log(`update metadata: ${key} = ${fmc[key]}`)
+                  console.log(`quaily.savePost: update metadata: ${key} = ${fmc[key]}`)
                   frontmatter[key] = fmc[key];
                 }
               }

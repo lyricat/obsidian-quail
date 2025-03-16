@@ -11,6 +11,7 @@ export interface QuailPluginSettings {
 
 	strictLineBreaks: boolean;
 	useEnglishCmds: boolean;
+	useFirstImageAsCover: boolean;
 }
 
 export interface QuailImageItem {

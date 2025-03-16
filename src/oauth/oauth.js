@@ -31,7 +31,6 @@ function getCodeFromUrl(url) {
   const returnedState = redirectUrl.searchParams.get("state") || "";
   if (code || returnedState) {
     // Exchange your code for a token, or do other flow tasks
-    console.log('Got callback code:', code, returnedState);
     return { code, returnedState };
   }
   return { code: "", returnedState: "" };
@@ -96,7 +95,6 @@ async function startLoginElectron() {
     // Listen for a navigation or redirect
     loginWindow.webContents.on('will-navigate', (event, url) => {
       event.preventDefault();
-      console.log("Callback URL intercepted on event will-navigate:", url);
       try {
         const token = handleCallback(url);
         resolve(token);
@@ -109,7 +107,6 @@ async function startLoginElectron() {
     // Also handle redirect
     loginWindow.webContents.on('did-redirect-navigation', (event, url, isInPlace, isMainFrame) => {
       event.preventDefault();
-      console.log("Callback URL intercepted on event did-redirect-navigation:", url);
       try {
         const token = handleCallback(url);
         resolve(token);
@@ -121,7 +118,6 @@ async function startLoginElectron() {
 
     // Intercept the callback request
     webRequest.onBeforeRequest(filter, async ({ url }) => {
-      console.log("Callback URL intercepted:", url);
       try {
         const token = handleCallback(url);
         resolve(token);
@@ -132,11 +128,9 @@ async function startLoginElectron() {
     });
 
     // Load the authorization URL
-    console.log("Opening login window:", authURL.toString());
     loginWindow.loadURL(authURL.toString());
 
     loginWindow.on("closed", () => {
-      console.log("Login window closed");
     });
   });
 }

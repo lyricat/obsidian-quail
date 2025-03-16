@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS: QuailPluginSettings = {
 	listSlug: '',
 	strictLineBreaks: true,
 	useEnglishCmds: false,
+	useFirstImageAsCover: false,
 	// tokens
 	accessToken: '',
 	refreshToken: '',
@@ -50,7 +51,6 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-		// 	console.log('click', evt);
 		// });
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
@@ -76,7 +76,7 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 	async loadActions() {
 		const actions = getActions(this);
 		if (actions.length === 0) {
-			console.error("No actions found");
+			console.error("quaily.loadActions: no actions found");
 			return;
 		} else if (actions.length === 1 && actions[0].id === 'quail-login') {
 			this.addCommand(actions[0]);
@@ -123,11 +123,11 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 
 	async login() {
 		try {
-			console.log("plugin.login: oauth flow start");
+			console.log("quaily.login: oauth flow start");
 			// Start the login flow in a popup
 			const token = await startLoginElectron();
 			// if your auth server is at localhost:8080
-			console.log("plugin.login: token expiry:", token.expiry);
+			console.log("quaily.login: token expiry:", token.expiry);
 			this.settings.accessToken = token.access_token;
 			this.settings.refreshToken = token.refresh_token;
 			this.settings.tokenExpiry = token.expiry;
@@ -137,7 +137,6 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 
 			// get user info
 			const me = await this.client.getMe();
-			console.log("login: me", me);
 			this.settings.me = me;
 
 			// get lists
@@ -148,30 +147,28 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 			await this.loadActions();
 			// store them somewhere safe (e.g. Obsidian plugin storage)
 		} catch (err) {
-			console.error("OAuth flow error:", err);
+			console.error("quaily.login: oauth flow error:", err);
 		}
 	}
 
 	async refreshToken() {
 		try {
-			console.log("plugin.refreshToken: refresh flow start");
+			console.log("quaily.refreshToken: refresh flow start");
 			// Start the login flow in a popup
 			const token = await refreshToken(this.settings.refreshToken)
 			// if your auth server is at localhost:8080
-			// console.log("plugin.refreshToken: access token:", token.access_token);
-			// console.log("plugin.refreshToken: refresh token:", token.refresh_token);
-			console.log("plugin.refreshToken: token expiry:", token.expiry);
+			console.log("quaily.refreshToken: token expiry:", token.expiry);
 			this.settings.accessToken = token.access_token;
 			this.settings.refreshToken = token.refresh_token;
 			this.settings.tokenExpiry = token.expiry;
 			await this.saveSettings();
 		} catch (err) {
-			console.error("refresh token flow error:", err);
+			console.error("quaily.refreshToken: refresh token flow error:", err);
 		}
 	}
 
 	async clearTokens() {
-		console.log("clearTokens: clear tokens");
+		console.log("quaily.clearTokens: clear tokens");
 		this.settings.accessToken = '';
 		this.settings.refreshToken = '';
 		this.settings.tokenExpiry = '';
@@ -203,7 +200,7 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 				this.refreshToken();
 			} else {
 				this.refreshToken();
-				console.log("Token is still valid, nothing to do");
+				console.log("quaily.updateToken: token is still valid, nothing to do");
 			}
 		} else {
 			this.clearTokens();

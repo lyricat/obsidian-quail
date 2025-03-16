@@ -76,8 +76,7 @@ export class PreviewModal extends Modal {
       });
 
     } catch (err) {
-      console.error('Failed to generate QR code:', err);
-      qrContainer.createEl('p', { text: 'Failed to generate QR code' });
+      qrContainer.createEl('p', { text: `Failed to generate QR code: ${err}` });
     }
 
     // Add button to open in browser

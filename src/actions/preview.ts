@@ -49,7 +49,6 @@ export default function preview(app: App, client: any, auxiliaClient: any, setti
         }
 
       } catch (error) {
-        console.error('Preview error:', error);
         new ErrorModal(app, error).open();
       } finally {
         loadingModal.close();

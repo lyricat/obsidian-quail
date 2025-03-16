@@ -113,7 +113,7 @@ export default {
                 files.push(AttachFile);
               }
             } catch (error) {
-              console.error(error);
+              console.error(`quaily.getImageFiles: error: ${error}`);
             }
           }
         }
@@ -125,7 +125,6 @@ export default {
   getActiveFileContent: async function (app: App) {
     const file = app.workspace.getActiveFile();
     if (file) {
-      // console.log("currnet file", file.path)
 
       const { frontmatter: fmc, content } = await this.getActiveFileFrontmatter(app)
 
@@ -148,7 +147,7 @@ export default {
           }
           const img = await app.vault.readBinary(fd)
           if (img.byteLength) {
-            console.log(`found: ${fd.path}, size: ${img.byteLength}`);
+            console.log(`quaily.getActiveFileContent: found: ${fd.path}, size: ${img.byteLength}`);
             const imgWrapper = {
               pathname: fd.path,
               name: fd.name,
@@ -192,7 +191,7 @@ export default {
 
   replaceImageUrls: function (content: string, oldUrls: string[], newUrls: string[]) {
     if (oldUrls.length !== newUrls.length) {
-      console.log("the number of old and new urls do not match, return original content");
+      console.log("quaily.replaceImageUrls: the number of old and new urls do not match, return original content");
       return content;
     }
     const urlMap: any = {};
@@ -222,7 +221,7 @@ export default {
             newLine = line.replace(`(${match[2]})`, `(${urlMap[oldUrl].newUrl})`);
             urlMap[oldUrl].used = true;
           } else {
-            console.log("replaceImageUrls:ignore image", oldUrl)
+            console.log("quaily.replaceImageUrls: ignore image", oldUrl)
           }
         }
       } else if (line.startsWith("![[") && line.endsWith("]]")) {
@@ -258,7 +257,7 @@ export default {
             }
           }
           if (!handled) {
-            console.log("replaceImageUrls:ignore image", name)
+            console.log("quaily.replaceImageUrls:ignore image", name)
           }
         }
       }

@@ -80,15 +80,25 @@ class QuailSettingTab extends PluginSettingTab {
 			)
 		}
 
-		containerEl.createEl("h6", { text: t('settings.commands') });
+		containerEl.createEl("h6", { text: t('settings.behavior') });
 
 		new Setting(containerEl)
-			.setName(t('settings.commands.use_english_cmds.title'))
-			.setDesc(t('settings.commands.use_english_cmds.desc'))
+			.setName(t('settings.behavior.use_english_cmds.title'))
+			.setDesc(t('settings.behavior.use_english_cmds.desc'))
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.useEnglishCmds)
 				.onChange(async (value) => {
 					this.plugin.settings.useEnglishCmds = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName(t('settings.behavior.use_first_image_as_cover.title'))
+			.setDesc(t('settings.behavior.use_first_image_as_cover.desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useFirstImageAsCover)
+				.onChange(async (value) => {
+					this.plugin.settings.useFirstImageAsCover = value;
 					await this.plugin.saveSettings();
 				}));
 
