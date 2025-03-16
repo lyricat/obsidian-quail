@@ -42,7 +42,7 @@
   "notices.set_channel_success": "✅ {title} is the default channel.",
   "notices.unpublish_success": "📕 This post has been unpublished. No more visible to readers.",
 
-  "actions.ai_gen_metadata": "Generate Meta by AI",
+  "actions.ai_gen_metadata": "Generate metadata by AI",
   "actions.send": "Send",
   "actions.save": "Save",
   "actions.publish": "Publish",
