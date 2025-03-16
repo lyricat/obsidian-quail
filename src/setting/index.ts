@@ -186,6 +186,13 @@ token expiry: ${this.plugin.settings.tokenExpiry}`;
           new ErrorModal(this.app, new Error('This is a test error.')).open();
         })
       )
+			buttonsSec.addButton(button => button
+				.setButtonText('expire token')
+				.onClick(async () => {
+					this.plugin.settings.tokenExpiry = '2025-03-15T00:00:00Z';
+					await this.plugin.saveSettings();
+				})
+			)
 		}
 	}
 }

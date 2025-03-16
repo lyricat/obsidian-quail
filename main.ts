@@ -157,7 +157,7 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 			// Start the login flow in a popup
 			const token = await refreshToken(this.settings.refreshToken)
 			// if your auth server is at localhost:8080
-			console.log("quaily.refreshToken: token expiry:", token.expiry);
+			console.log("quaily.refreshToken: access token expiry:", token.expiry);
 			this.settings.accessToken = token.access_token;
 			this.settings.refreshToken = token.refresh_token;
 			this.settings.tokenExpiry = token.expiry;
@@ -192,17 +192,22 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 		if (this.settings.tokenExpiry !== '') {
 			const expiry = new Date(this.settings.tokenExpiry);
 			const now = new Date();
-			if (expiry.getTime() <= now.getTime() - 3600*24*364) {
+			const refreshTokenThreshold = 3600*24*364*1000;
+			const accessTokenThreshold = 3600*12*1000;
+			if (expiry.getTime() <= now.getTime() - refreshTokenThreshold) {
 				// if the expiry is more than 364 days ago, need to login again
+				console.log("quaily.updateToken: token expired, clear tokens", expiry, now);
 				this.clearTokens();
-			} else if (expiry.getTime() <= now.getTime() - 3600*12) {
+			} else if (expiry.getTime() <= now.getTime() - accessTokenThreshold) {
 				// refresh the token if it's less than 12 hours from expiry
+				console.log("quaily.updateToken: token expired, refresh token", expiry, now);
 				this.refreshToken();
 			} else {
 				this.refreshToken();
 				console.log("quaily.updateToken: token is still valid, nothing to do");
 			}
 		} else {
+			console.log("quaily.updateToken: no token found, clear tokens");
 			this.clearTokens();
 		}
 	}
