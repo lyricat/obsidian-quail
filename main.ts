@@ -33,7 +33,12 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 		this.getClients();
 
 		if (this.isLogged()) {
-			await this.updateChannels();
+			const q = [
+				this.updateChannels(),
+				this.updateMe(),
+			];
+
+			await Promise.all(q);
 
 			await this.saveSettings();
 		}
@@ -118,6 +123,16 @@ export default class QuailPlugin extends Plugin implements QuailPlugin {
 				this.settings.listID = '';
 				this.settings.listSlug = '';
 			}
+		}
+	}
+
+	async updateMe() {
+		try {
+			const me = await this.client.getMe();
+			this.settings.me = me;
+		} catch (err) {
+			this.clearTokens();
+			return
 		}
 	}
 
